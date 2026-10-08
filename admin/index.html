@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard admin — GREC Bénin</title>
   <meta name="description" content="Tableau de bord administrateur du réseau GREC." />
-  <link rel="icon" href="../Assets/images/favicon.png" type="image/png" />
+  <link rel="icon" href="../Assets/images/logo.png" type="image/png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1503,7 +1503,7 @@
           </div>
           <div class="flex-1">
             <div class="font-semibold text-navy">${escapeHtml(item.nom || 'Partenaire')}</div>
-            ${item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" class="text-sm text-slate-500">${escapeHtml(item.url)}</a>` : `<div class="text-sm text-slate-500">&nbsp;</div>`}
+            ${/^https?:\/\//i.test(item.url || '') ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="text-sm text-slate-500">${escapeHtml(item.url)}</a>` : `<div class="text-sm text-slate-500">&nbsp;</div>`}
           </div>
           <div class="flex flex-col gap-2">
             <button data-action="edit-partner" data-payload='${escapeHtml(JSON.stringify(item))}' class="mini-btn bg-slate-100 text-slate-700">Modifier</button>
@@ -1773,15 +1773,24 @@
       if (!email) return;
 
       try {
+        // Le document admins doit avoir pour identifiant l'UID du compte :
+        // la personne doit donc d'abord s'être inscrite comme membre.
+        const normalized = email.toLowerCase().trim();
+        const found = await db.collection(COLLECTIONS.MEMBRES).where('email', '==', normalized).limit(1).get();
+        if (found.empty) {
+          showToast('Aucun membre inscrit avec cet email. La personne doit d\'abord créer son compte.', 'error');
+          return;
+        }
         const adminData = {
-          email: email.toLowerCase().trim(),
+          uid: found.docs[0].id,
+          email: normalized,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           createdBy: adminState.user?.uid || '',
           role: ROLES.ADMIN,
-          status: 'actif'
+          active: true
         };
 
-        await db.collection(COLLECTIONS.ADMINS).add(adminData);
+        await db.collection(COLLECTIONS.ADMINS).doc(found.docs[0].id).set(adminData);
         showToast(`Compte admin créé pour ${email}`, 'success');
         await refreshAll();
       } catch (error) {
@@ -1789,13 +1798,15 @@
         console.error(error);
       }
     }
+
+    // Contrôle d'accès : seuls les comptes présents dans la collection admins passent.
+    async function ensureAdminAccess() {
     const user = auth.currentUser;
     if (!user) {
       window.location.href = '../pages/auth.html';
       return false;
     }
 
-    await ensureAdminBootstrap(user);
     const isAdmin = await isCurrentUserAdmin(user);
     if (!isAdmin) {
       showToast('Accès réservé à l\'administrateur', 'error');
@@ -1830,6 +1841,7 @@
     }
 
     async function boot() {
+      if (!(await ensureAdminAccess())) return;
       els.articleForm = document.getElementById('article-form');
       els.articleId = document.getElementById('article-id');
       els.articleTitle = document.getElementById('article-title');

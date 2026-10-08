@@ -11,7 +11,7 @@
   <meta property="og:description" content="Rejoignez le réseau des entrepreneurs béninois et de la diaspora." />
   <meta property="og:image"
     content="https://commons.wikimedia.org/wiki/Special:FilePath/Salon_de_l%27Entrepreneuriat_Num%C3%A9rique_et_de_l%27Intelligence_Artificielle_du_B%C3%A9nin.jpg" />
-  <link rel="icon" href="Assets/images/favicon.png" type="image/png" />
+  <link rel="icon" href="Assets/images/logo.png" type="image/png" />
 
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1062,8 +1062,8 @@
           grid.innerHTML += `
         <article class="card reveal group overflow-hidden">
           <div class="relative overflow-hidden h-52">
-            <img src="${a.imageURL || ''}"
-                 alt="${a.titre}"
+            <img src="${escapeHtml(safeImageUrl(a.imageURL))}"
+                 alt="${escapeHtml(a.titre)}"
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                  onerror="this.parentElement.style.background='#1A2E42'"/>
             <div class="absolute top-3 left-3 bg-gold text-white text-xs font-semibold px-3 py-1 rounded-full">
@@ -1072,9 +1072,9 @@
           </div>
           <div class="p-6">
             <h3 class="font-display font-semibold text-navy text-lg leading-tight mb-3 group-hover:text-gold transition-colors">
-              ${a.titre}
+              ${escapeHtml(a.titre)}
             </h3>
-            <p class="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-3">${a.resume || ''}</p>
+            <p class="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-3">${escapeHtml(a.resume || '')}</p>
             <a href="pages/actualites.html" class="text-gold text-sm font-medium hover:underline inline-flex items-center gap-1">
               Lire l'article <span>→</span>
             </a>

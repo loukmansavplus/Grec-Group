@@ -57,11 +57,6 @@ const VALIDATION_LABELS = {
   refuse:     "Refusé"
 };
 
-// ── Admin Allowlist ──────────────────────────────────────────
-const ADMIN_EMAILS = [
-  "admin@grec.com"
-];
-
 // ── Storage Paths ────────────────────────────────────────────
 const STORAGE_PATHS = {
   MEMBRES:        "membres/photos/",

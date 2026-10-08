@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Galerie — GREC Bénin</title>
     <meta name="description" content="Découvrez les moments partagés et événements du réseau GREC." />
-    <link rel="icon" href="../Assets/images/favicon.png" type="image/png" />
+    <link rel="icon" href="../Assets/images/logo.png" type="image/png" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -635,7 +635,7 @@
                 img.className = 'gallery-item reveal';
                 img.setAttribute('data-category', g.categorie || 'reunions');
                 img.innerHTML = `
-          <img src="${g.url || '../Assets/images/hero.jpg'}" alt="${g.titre || 'Photo GREC'}" loading="lazy" />
+          <img src="${escapeHtml(safeImageUrl(g.url) || '../Assets/images/hero.jpg')}" alt="${escapeHtml(g.titre || 'Photo GREC')}" loading="lazy" />
           <div class="gallery-overlay">
             <a href="#" onclick="openLightbox(${idx}); return false;" title="Voir en grand">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -644,7 +644,7 @@
             </a>
           </div>
           <div class="gallery-caption">
-            <strong>${g.titre || 'Photo GREC'}</strong>
+            <strong>${escapeHtml(g.titre || 'Photo GREC')}</strong>
             <span>${g.categorie === 'plage' ? 'Plage' : g.categorie === 'diaspora' ? 'RDV de la diaspora' : 'Rencontre'}</span>
           </div>
         `;

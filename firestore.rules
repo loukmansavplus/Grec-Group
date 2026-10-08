@@ -3,90 +3,136 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ── Helpers ─────────────────────────────────────────────
     function isAuthenticated() {
       return request.auth != null;
     }
 
+    // Admin = document admins/{uid} actif.
+    // Le premier admin se crée À LA MAIN dans la console Firebase
+    // (voir ADMIN-SETUP.md) : aucune adresse email n'est codée ici.
     function isAdmin() {
-      return isAuthenticated() && (
-        request.auth.token.email == 'admin@grec.com'
-        || (
-          exists(/databases/$(database)/documents/admins/$(request.auth.uid))
-          && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active != false
-        )
-      );
+      return isAuthenticated()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active != false;
     }
 
-    function isMemberSubmissionCreate() {
-      return isAuthenticated()
+    function isOwner(data) {
+      return isAuthenticated() && data.authorUid == request.auth.uid;
+    }
+
+    // ── Membres ─────────────────────────────────────────────
+    // Lecture réservée aux connectés (le document contient email/téléphone).
+    // Chacun gère son profil mais ne peut pas se donner un rôle ou un statut.
+    match /membres/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.data.role == 'membre'
+        && request.resource.data.statut == 'actif';
+      allow update: if isAdmin() || (
+        isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.statut == resource.data.statut
+      );
+      allow delete: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
+    }
+
+    // ── Admins ──────────────────────────────────────────────
+    match /admins/{adminId} {
+      allow get: if isAuthenticated() && (request.auth.uid == adminId || isAdmin());
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Journal des actions admin
+    match /ACTION_LOG/{logId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ── Actualités et événements ────────────────────────────
+    // Les brouillons / contenus en attente ne sont lisibles que par
+    // l'admin et leur auteur. Les requêtes publiques doivent filtrer
+    // sur publie == true.
+    match /actualites/{articleId} {
+      allow read: if resource.data.publie == true || isAdmin() || isOwner(resource.data);
+      allow write: if isAdmin();
+    }
+
+    match /evenements/{eventId} {
+      allow read: if resource.data.publie == true || isAdmin() || isOwner(resource.data);
+      allow write: if isAdmin();
+    }
+
+    // ── Contributions des membres (modérées par l'admin) ────
+    match /contributions/{contribId} {
+      allow read: if isAdmin() || isOwner(resource.data);
+      allow create: if isAuthenticated()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.validationStatus == 'en_attente'
-        && request.resource.data.publie == false;
+        && request.resource.data.publie == false
+        && request.resource.data.type in ['article', 'event'];
+      allow update: if isAdmin();
+      allow delete: if isAdmin() || (isOwner(resource.data) && resource.data.validationStatus == 'en_attente');
     }
 
-    function isMemberPendingUpdate() {
-      return isAuthenticated()
-        && resource.data.authorUid == request.auth.uid
-        && resource.data.validationStatus == 'en_attente'
-        && request.resource.data.authorUid == resource.data.authorUid
-        && request.resource.data.validationStatus == 'en_attente'
-        && request.resource.data.publie == false;
-    }
-
-    function isMemberPendingDelete() {
-      return isAuthenticated()
-        && resource.data.authorUid == request.auth.uid
-        && resource.data.validationStatus == 'en_attente';
-    }
-
-    // Membres - chacun peut gérer son propre profil, lecture publique
-    match /membres/{userId} {
-      allow read: if true;
-      allow create, update, delete: if isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // Admins - bootstrap et contrôle d'accès admin
-    match /admins/{userId} {
-      allow read, write: if isAuthenticated() && request.auth.uid == userId && isAdmin();
-    }
-
-    // Actualites - lecture publique, soumission membres, modération admin
-    match /actualites/{articleId} {
-      allow read: if true;
-      allow create: if isAdmin() || isMemberSubmissionCreate();
-      allow update: if isAdmin() || isMemberPendingUpdate();
-      allow delete: if isAdmin() || isMemberPendingDelete();
-    }
-
-    // Galerie - lecture publique, écriture admin
+    // ── Galerie et partenaires : lecture publique, écriture admin ──
     match /galerie/{imageId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow write: if isAdmin();
     }
 
-    // Evenements - lecture publique, soumission membres, modération admin
-    match /evenements/{eventId} {
+    match /partenaires/{partnerId} {
       allow read: if true;
-      allow create: if isAdmin() || isMemberSubmissionCreate();
-      allow update: if isAdmin() || isMemberPendingUpdate();
-      allow delete: if isAdmin() || isMemberPendingDelete();
+      allow write: if isAdmin();
     }
 
-    // Newsletter - inscription publique, lecture admin
-    match /newsletter/{email} {
-      allow create: if true;
+    // ── Newsletter : inscription publique validée, lecture admin ──
+    match /newsletter/{docId} {
+      allow create: if request.resource.data.keys().hasOnly(['email', 'subscribedAt'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 254
+        && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
       allow read, update, delete: if isAdmin();
     }
 
-    // Contacts - message public, lecture admin
+    // ── Contacts : message public validé, lecture admin ─────
     match /contacts/{contactId} {
-      allow create: if true;
+      allow create: if request.resource.data.keys().hasOnly(['nom', 'email', 'message', 'createdAt', 'source'])
+        && request.resource.data.nom is string && request.resource.data.nom.size() <= 120
+        && request.resource.data.email is string && request.resource.data.email.size() <= 254
+        && request.resource.data.message is string && request.resource.data.message.size() <= 5000;
       allow read, update, delete: if isAdmin();
     }
 
-    // Chats - utilisateurs connectes
+    // ── Messagerie : réservée aux deux participants ─────────
     match /chats/{chatId} {
-      allow read, write: if isAuthenticated();
+      // get autorisé si le document n'existe pas encore (test d'existence)
+      allow get: if isAuthenticated()
+        && (resource == null || request.auth.uid in resource.data.participants);
+      allow list: if isAuthenticated()
+        && request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated()
+        && request.resource.data.participants.size() == 2
+        && request.auth.uid in request.resource.data.participants;
+      allow update: if isAuthenticated()
+        && request.auth.uid in resource.data.participants
+        && request.resource.data.participants == resource.data.participants;
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated()
+          && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        allow create: if isAuthenticated()
+          && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 2000;
+        allow update, delete: if false;
+      }
     }
   }
 }

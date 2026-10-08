@@ -291,20 +291,23 @@ async function chatOpenConversationWith(targetUid, targetName) {
   const ref = db.collection(COLLECTIONS.CHATS).doc(id);
   const currentName = document.getElementById('chat-current-user-name').textContent || chatCurrentUser.email;
 
-  await ref.set({
-    participants: [chatCurrentUser.uid, targetUid],
-    participantNames: {
-      [chatCurrentUser.uid]: currentName,
-      [targetUid]: targetName || 'Membre'
-    },
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-    lastReadBy: {
-      [chatCurrentUser.uid]: firebase.firestore.FieldValue.serverTimestamp()
-    },
-    lastMessageText: 'Conversation créée'
-  }, { merge: true });
+  const existing = await ref.get();
+  if (!existing.exists) {
+    await ref.set({
+      participants: [chatCurrentUser.uid, targetUid],
+      participantNames: {
+        [chatCurrentUser.uid]: currentName,
+        [targetUid]: targetName || 'Membre'
+      },
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastReadBy: {
+        [chatCurrentUser.uid]: firebase.firestore.FieldValue.serverTimestamp()
+      },
+      lastMessageText: 'Conversation créée'
+    });
+  }
 
   chatOpenConversation(id);
 }

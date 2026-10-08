@@ -2,6 +2,19 @@
 //  GREC GROUP — Utilitaires JS globaux
 // ============================================================
 
+// ── Échappement HTML (à utiliser avant tout insertion dans innerHTML) ──
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+// URL d'image sûre : uniquement http(s) ou chemin relatif
+function safeImageUrl(url) {
+  const value = String(url || '').trim();
+  return /^(https?:\/\/|\.{0,2}\/|[\w-]+\/)/i.test(value) && !/^\s*javascript:/i.test(value) ? value : '';
+}
+
 // ── Toast Notifications ──────────────────────────────────────
 function showToast(message, type = 'info', duration = 4000) {
   // Affiche une notification toast temporaire en bas de l'écran
@@ -15,7 +28,7 @@ function showToast(message, type = 'info', duration = 4000) {
   const icons = { success: '✓', error: '✕', info: 'ℹ' };
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.innerHTML = `<span style="font-size:16px">${icons[type] || icons.info}</span><span>${message}</span>`;
+  toast.innerHTML = `<span style="font-size:16px">${icons[type] || icons.info}</span><span>${escapeHtml(message)}</span>`;
   container.appendChild(toast);
 
   setTimeout(() => {
@@ -139,35 +152,6 @@ function normalizeValidationStatus(value, publie) {
   return VALIDATION_STATUS.PENDING;
 }
 
-function isAllowlistedAdmin(user) {
-  if (!user || !user.email) return false;
-  return (ADMIN_EMAILS || []).map(email => String(email).toLowerCase()).includes(String(user.email).toLowerCase());
-}
-
-async function ensureAdminBootstrap(user) {
-  if (!user || !isAllowlistedAdmin(user)) return false;
-  try {
-    const ref = db.collection(COLLECTIONS.ADMINS).doc(user.uid);
-    const snap = await ref.get();
-    if (!snap.exists) {
-      await ref.set({
-        uid: user.uid,
-        email: user.email || '',
-        name: getAdminName(user),
-        photoURL: user.photoURL || '',
-        role: ROLES.ADMIN,
-        active: true,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-    }
-    return true;
-  } catch (error) {
-    console.warn('Bootstrap admin impossible:', error);
-    return false;
-  }
-}
-
 async function ensureMemberProfile(user) {
   if (!user) return false;
   try {
@@ -203,7 +187,6 @@ async function ensureMemberProfile(user) {
 
 async function isCurrentUserAdmin(user) {
   if (!user) return false;
-  if (isAllowlistedAdmin(user)) return true;
   try {
     const snap = await db.collection(COLLECTIONS.ADMINS).doc(user.uid).get();
     if (!snap.exists) return false;
@@ -328,7 +311,6 @@ function initAuthState() {
       return;
     }
 
-    await ensureAdminBootstrap(user);
     await ensureMemberProfile(user);
     const isAdmin = await isCurrentUserAdmin(user);
 

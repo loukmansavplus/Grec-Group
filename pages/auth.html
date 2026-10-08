@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connexion — GREC Bénin</title>
   <meta name="description" content="Connectez-vous ou rejoignez le réseau GREC d'entrepreneurs béninois." />
-  <link rel="icon" href="../Assets/images/favicon.png" type="image/png" />
+  <link rel="icon" href="../Assets/images/logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -750,7 +750,7 @@
         showToast('Connexion réussie ! Bienvenue.', 'success');
         setTimeout(() => window.location.href = getHomeHref(), 1200);
       } catch (err) {
-        const msg = { 'auth/user-not-found': 'Aucun compte avec cet email.', 'auth/wrong-password': 'Mot de passe incorrect.', 'auth/invalid-email': 'Email invalide.' }[err.code] || err.message;
+        const msg = { 'auth/user-not-found': 'Email ou mot de passe incorrect.', 'auth/wrong-password': 'Email ou mot de passe incorrect.', 'auth/invalid-credential': 'Email ou mot de passe incorrect.', 'auth/invalid-login-credentials': 'Email ou mot de passe incorrect.', 'auth/invalid-email': 'Email invalide.', 'auth/too-many-requests': 'Trop de tentatives. Réessayez plus tard.', 'auth/network-request-failed': 'Problème de connexion réseau.' }[err.code] || err.message;
         document.getElementById('login-email-err').textContent = msg;
         showToast(msg, 'error');
       } finally {

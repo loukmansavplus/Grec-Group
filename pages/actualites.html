@@ -7,7 +7,7 @@
   <title>Actualités — GREC Bénin</title>
   <meta name="description"
     content="Suivez les actualités, événements et nouvelles du réseau GREC — entrepreneurs béninois et diaspora." />
-  <link rel="icon" href="../Assets/images/favicon.png" type="image/png" />
+  <link rel="icon" href="../Assets/images/logo.png" type="image/png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1701,21 +1701,21 @@
       pageItems.forEach((a) => {
         const articleIndex = allArticlesData.indexOf(a);
         container.innerHTML += `
-          <article class="article-card reveal" data-cat="${a.cat}">
+          <article class="article-card reveal" data-cat="${escapeHTML(a.cat)}">
             <div class="img-wrap">
               ${a.img ? `<img src="${escapeHTML(a.img)}" alt="${escapeHTML(a.titre)}" loading="lazy" />` : `<div class="img-placeholder"><span>Image à venir</span></div>`}
-              <div class="absolute top-3 left-3"><span class="cat-badge cat-${a.cat}">${a.catLabel}</span></div>
+              <div class="absolute top-3 left-3"><span class="cat-badge cat-${escapeHTML(a.cat)}">${escapeHTML(a.catLabel)}</span></div>
             </div>
             <div class="p-5 flex flex-col flex-grow">
               <div class="text-xs text-slate-400 mb-3 flex items-center gap-2">
-                <time>${a.date || ''}</time><span>·</span><span>${a.readTime || 5} min</span>
+                <time>${escapeHTML(a.date || '')}</time><span>·</span><span>${escapeHTML(a.readTime || 5)} min</span>
               </div>
               <h3 class="font-display text-lg font-semibold text-navy mb-2 leading-snug">
-                <a href="#article-${articleIndex}" data-article-index="${articleIndex}" class="hover:text-gold transition-colors">${a.titre || ''}</a>
+                <a href="#article-${articleIndex}" data-article-index="${articleIndex}" class="hover:text-gold transition-colors">${escapeHTML(a.titre || '')}</a>
               </h3>
-              <p class="text-slate-500 text-sm leading-relaxed mb-4 flex-grow">${a.resume || ''}</p>
+              <p class="text-slate-500 text-sm leading-relaxed mb-4 flex-grow">${escapeHTML(a.resume || '')}</p>
               <div class="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-100">
-                <span>Par ${a.auteur || 'GREC'}</span>
+                <span>Par ${escapeHTML(a.auteur || 'GREC')}</span>
                 <a href="#article-${articleIndex}" data-article-index="${articleIndex}" class="text-gold hover:underline font-medium">Lire -></a>
               </div>
             </div>
@@ -1774,17 +1774,17 @@
           featuredEl.dataset.cat = fCat;
           featuredEl.innerHTML = `
             <div class="img-wrap">
-              ${fImg ? `<img src="${fImg}" alt="${featured.titre || 'Actualité'}" loading="lazy" />` : `<div class="img-placeholder"><span>Image événement à placer</span></div>`}
-              <div class="absolute top-4 left-4"><span class="cat-badge cat-${fCat}">${fCatLabel}</span></div>
+              ${fImg ? `<img src="${escapeHTML(safeImageUrl(fImg))}" alt="${escapeHTML(featured.titre || 'Actualité')}" loading="lazy" />` : `<div class="img-placeholder"><span>Image événement à placer</span></div>`}
+              <div class="absolute top-4 left-4"><span class="cat-badge cat-${escapeHTML(fCat)}">${escapeHTML(fCatLabel)}</span></div>
             </div>
             <div class="p-8 flex flex-col justify-between">
               <div>
-                <div class="flex items-center gap-3 mb-4 text-xs text-slate-400"><time>${fDate}</time></div>
-                <h2 class="font-display text-2xl font-semibold text-navy mb-3 leading-snug">${featured.titre || ''}</h2>
-                <p class="text-slate-600 text-sm leading-relaxed mb-4">${featured.description || featured.resume || ''}</p>
+                <div class="flex items-center gap-3 mb-4 text-xs text-slate-400"><time>${escapeHTML(fDate)}</time></div>
+                <h2 class="font-display text-2xl font-semibold text-navy mb-3 leading-snug">${escapeHTML(featured.titre || '')}</h2>
+                <p class="text-slate-600 text-sm leading-relaxed mb-4">${escapeHTML(featured.description || featured.resume || '')}</p>
               </div>
               <div class="flex items-center justify-between">
-                <div class="text-xs text-slate-400">Par ${featured.auteur || 'GREC'}</div>
+                <div class="text-xs text-slate-400">Par ${escapeHTML(featured.auteur || 'GREC')}</div>
                 <a href="#article-featured" class="btn btn-gold text-sm py-2 px-5">Lire l'article -></a>
               </div>
             </div>`;
@@ -1833,12 +1833,12 @@
           wrap.innerHTML += `
             <div class="flex gap-3">
               <div class="text-center ${idx === 0 ? 'bg-gold' : 'bg-navy'} text-white rounded-lg px-3 py-2 min-w-[48px]">
-                <div class="text-lg font-bold font-display leading-none">${day}</div>
-                <div class="text-xs opacity-80 mt-0.5">${mon}</div>
+                <div class="text-lg font-bold font-display leading-none">${escapeHTML(day)}</div>
+                <div class="text-xs opacity-80 mt-0.5">${escapeHTML(mon)}</div>
               </div>
               <div>
-                <div class="text-sm font-medium text-navy">${d.titre || 'Événement'}</div>
-                <div class="text-xs text-slate-400 mt-0.5">${d.lieu || '-'}</div>
+                <div class="text-sm font-medium text-navy">${escapeHTML(d.titre || 'Événement')}</div>
+                <div class="text-xs text-slate-400 mt-0.5">${escapeHTML(d.lieu || '-')}</div>
               </div>
             </div>`;
         });
