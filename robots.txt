@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /pages/auth.html
+Disallow: /pages/register.html
+Disallow: /pages/chat.html
+Disallow: /pages/profil.html
