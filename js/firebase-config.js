@@ -5,12 +5,12 @@
 // ============================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBYE6ODV8x_0SNbhXZxgR6Wz2EIVQftaTc",
-  authDomain: "savplus-school.firebaseapp.com",
-  projectId: "savplus-school",
-  storageBucket: "savplus-school.firebasestorage.app",
-  messagingSenderId: "952771003789",
-  appId: "1:952771003789:web:35026a68be664fe84429c4"
+  apiKey: "AIzaSyBwyFj7anjSxzbvhWYRJmSZ5lBK0MKiBmQ",
+  authDomain: "grec-group.firebaseapp.com",
+  projectId: "grec-group",
+  storageBucket: "grec-group.firebasestorage.app",
+  messagingSenderId: "187575104452",
+  appId: "1:187575104452:web:cfa9d2dc1484ff1e79ea91"
 };
 
 // Initialisation Firebase

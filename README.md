@@ -161,4 +161,4 @@ Options utiles :
 - `--upsert` pour mettre à jour aussi les documents déjà présents
 - `--skip-disabled` pour ignorer les comptes Auth désactivés
 
-Le script lit `.firebaserc` par défaut, ou tu peux forcer `--project-id savplus-school`.
+Le script lit `.firebaserc` par défaut, ou tu peux forcer `--project-id grec-group`.
