@@ -47,19 +47,33 @@
   <style>
     /* Hero */
     .hero-bg {
-      background-image: linear-gradient(to bottom,
-          rgba(13, 27, 42, 0.58) 0%,
-          rgba(13, 27, 42, 0.30) 40%,
-          rgba(200, 137, 58, 0.42) 100%),
+      background-image:
+        linear-gradient(90deg,
+          rgba(10, 21, 33, 0.90) 0%,
+          rgba(10, 21, 33, 0.78) 45%,
+          rgba(10, 21, 33, 0.45) 100%),
+        linear-gradient(to bottom,
+          rgba(10, 21, 33, 0.35) 0%,
+          rgba(10, 21, 33, 0.25) 60%,
+          rgba(200, 137, 58, 0.30) 100%),
         url('Assets/images/hero-equipe.jpg');
       background-size: cover;
       background-position: center 60%;
       background-attachment: fixed;
     }
 
+    .hero-bg h1,
+    .hero-bg p,
+    .hero-bg .stat-number {
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
+    }
+
     @media (max-width: 1024px) {
       .hero-bg {
         background-attachment: scroll;
+        background-image:
+          linear-gradient(to bottom, rgba(10, 21, 33, 0.82), rgba(10, 21, 33, 0.72)),
+          url('Assets/images/hero-equipe.jpg');
       }
     }
 
@@ -166,10 +180,6 @@
         <div
           class="hidden items-center justify-center w-10 h-10 rounded-xl bg-gold text-white font-display font-bold text-lg">
           G</div>
-        <div class="hidden sm:block">
-          <div class="brand-title font-display font-semibold text-lg leading-tight">GREC</div>
-          <div class="logo-subtitle text-xs">Bénin · Diaspora</div>
-        </div>
       </a>
       <div class="hidden lg:flex items-center gap-8">
         <a href="index.html" class="nav-link active text-sm font-medium">Accueil</a>
@@ -251,7 +261,7 @@
       </h1>
 
 
-      <p class="opacity-0 animate-fade-up delay-3 text-white/65 text-lg md:text-xl max-w-xl mb-10 leading-relaxed">
+      <p class="opacity-0 animate-fade-up delay-3 text-white/90 text-lg md:text-xl max-w-xl mb-10 leading-relaxed">
         Expérience · Innovation · Excellence<br />
         <span class="text-sm font-light">Le réseau des entrepreneurs béninois et de la diaspora</span>
       </p>
@@ -272,22 +282,22 @@
 
 
       <div
-        class="opacity-0 animate-fade-up delay-5 grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-white/15 pt-8 max-w-2xl">
+        class="opacity-0 animate-fade-up delay-5 grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-white/30 pt-8 max-w-2xl">
         <div>
           <div class="stat-number text-4xl font-display font-bold" data-target="3">3</div>
-          <div class="text-white/45 text-xs mt-1 uppercase tracking-wide">Coordinateurs</div>
+          <div class="text-white/80 text-xs mt-1 uppercase tracking-wide font-medium">Coordinateurs</div>
         </div>
         <div>
           <div class="stat-number text-4xl font-display font-bold">2021</div>
-          <div class="text-white/45 text-xs mt-1 uppercase tracking-wide">Année de création</div>
+          <div class="text-white/80 text-xs mt-1 uppercase tracking-wide font-medium">Année de création</div>
         </div>
         <div>
           <div class="stat-number text-4xl font-display font-bold" data-target="9">9</div>
-          <div class="text-white/45 text-xs mt-1 uppercase tracking-wide">Secteurs couverts</div>
+          <div class="text-white/80 text-xs mt-1 uppercase tracking-wide font-medium">Secteurs couverts</div>
         </div>
         <div>
           <div class="stat-number text-4xl font-display font-bold">3</div>
-          <div class="text-white/45 text-xs mt-1 uppercase tracking-wide">BJ · FR · RW</div>
+          <div class="text-white/80 text-xs mt-1 uppercase tracking-wide font-medium">BJ · FR · RW</div>
         </div>
       </div>
     </div>
@@ -849,12 +859,8 @@
 
       <div class="md:col-span-1">
         <div class="brand-lockup flex items-center gap-3 mb-4">
-          <img src="Assets/images/logo.png" alt="GREC" class="h-12 object-contain"
+          <img src="Assets/images/logo-neutre.png" alt="GREC" class="h-12 object-contain"
             onerror="this.style.display='none'" />
-          <div>
-            <div class="brand-title font-display font-semibold text-lg leading-tight">GREC</div>
-            <div class="logo-subtitle text-xs">Bénin · Diaspora</div>
-          </div>
         </div>
         <p class="text-white/45 text-sm leading-relaxed mb-5">
           Groupe de Réflexion sur l'Entrepreneuriat et la Créativité au Bénin.

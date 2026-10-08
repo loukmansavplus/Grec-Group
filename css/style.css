@@ -1685,3 +1685,20 @@ footer .max-w-7xl > div:first-child {
   }
 }
 
+
+/* ── Logo du menu et du pied de page : sans cadre ni texte ───── */
+#navbar .brand-lockup,
+footer .brand-lockup {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+#navbar .brand-lockup .brand-title,
+#navbar .brand-lockup .logo-subtitle,
+footer .brand-lockup .brand-title,
+footer .brand-lockup .logo-subtitle {
+  display: none;
+}
