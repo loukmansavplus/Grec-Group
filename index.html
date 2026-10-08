@@ -680,18 +680,15 @@
       </div>
 
 
-      <div class="grid md:grid-cols-3 gap-8" id="articles-grid">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6" id="articles-grid">
 
 
         <article class="card reveal group overflow-hidden">
-          <div class="relative overflow-hidden h-52">
-            <!-- Portrait en hauteur : fond flou de la même photo + portrait entier au centre -->
-            <img src="Assets/images/new_1635496633_0191.jpeg" alt="" aria-hidden="true"
-              class="absolute inset-0 w-full h-full object-cover scale-125 blur-xl opacity-70" />
+          <div class="relative overflow-hidden aspect-square">
             <img src="Assets/images/new_1635496633_0191.jpeg" alt="Jocelyne Marina Duval"
-              class="relative z-[1] h-full mx-auto object-contain group-hover:scale-105 transition-transform duration-500"
+              class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
               onerror="this.parentElement.style.background='#1A2E42'" />
-            <div class="absolute z-10 top-3 left-3 bg-gold text-white text-xs font-semibold px-3 py-1 rounded-full">
+            <div class="absolute top-3 left-3 bg-gold text-white text-xs font-semibold px-3 py-1 rounded-full">
               22 Oct 2021
             </div>
           </div>
@@ -713,7 +710,7 @@
 
 
         <article class="card reveal group overflow-hidden">
-          <div class="relative overflow-hidden h-52">
+          <div class="relative overflow-hidden aspect-square">
             <img src="Assets/images/article-1.jpg" alt="Boris Djimadja"
               class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
               onerror="this.parentElement.style.background='#1A2E42'" />
@@ -739,7 +736,7 @@
 
 
         <article class="card reveal group overflow-hidden">
-          <div class="relative overflow-hidden h-52">
+          <div class="relative overflow-hidden aspect-square">
             <img src="Assets/images/action-sociale.jpg" alt="Action sociale Athiémé"
               class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               onerror="this.parentElement.style.background='#1A2E42'" />
@@ -760,6 +757,19 @@
               Lire l'article <span>→</span>
             </a>
           </div>
+        </article>
+
+        <article class="card reveal group overflow-hidden flex flex-col justify-between p-8 text-white" style="background:#0D1B2A">
+          <div>
+            <div class="section-label mb-4">Vie du réseau</div>
+            <h3 class="font-display font-semibold text-xl leading-tight mb-3">Retrouvez toute l'actualité du GREC</h3>
+            <p class="text-white/70 text-sm leading-relaxed">
+              Entretiens, événements, partenariats et actions sociales : suivez la vie du réseau.
+            </p>
+          </div>
+          <a href="pages/actualites.html" class="btn btn-gold text-sm mt-6 self-start">
+            Tous les articles <span>→</span>
+          </a>
         </article>
 
       </div>
@@ -1050,7 +1060,7 @@
         const snap = await db.collection(COLLECTIONS.ACTUALITES)
           .where('publie', '==', true)
           .orderBy('publishedAt', 'desc')
-          .limit(3)
+          .limit(4)
           .get();
 
         if (snap.empty) return; // garder les articles statiques
@@ -1062,7 +1072,7 @@
           const a = doc.data();
           grid.innerHTML += `
         <article class="card reveal group overflow-hidden">
-          <div class="relative overflow-hidden h-52">
+          <div class="relative overflow-hidden aspect-square">
             <img src="${escapeHtml(safeImageUrl(a.imageURL))}"
                  alt="${escapeHtml(a.titre)}"
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
