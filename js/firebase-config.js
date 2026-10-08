@@ -69,9 +69,9 @@ const STORAGE_PATHS = {
 
 // ── Cloudinary (uploads images depuis le navigateur) ───────
 const CLOUDINARY = {
-  CLOUD_NAME: "dk5lhxtoh",
+  CLOUD_NAME: "onozly6o",
   UPLOAD_PRESET: "grec-upload",
-  UPLOAD_URL: "https://api.cloudinary.com/v1_1/dk5lhxtoh/image/upload"
+  UPLOAD_URL: "https://api.cloudinary.com/v1_1/onozly6o/image/upload"
 };
 console.log("Firebase connecté :", firebase.app().name);
 
