@@ -164,6 +164,12 @@
         padding-right: 0.5rem;
       }
     }
+  
+    /* Tableaux : défilement horizontal au lieu d'écraser les colonnes (évite le texte coupé lettre par lettre) */
+    .admin-table-scroll { -webkit-overflow-scrolling: touch; }
+    .admin-table-scroll table { width: max-content; min-width: 100%; }
+    .admin-table-scroll th, .admin-table-scroll td { white-space: nowrap; word-break: normal !important; overflow-wrap: normal !important; }
+    .admin-table-scroll td .flex-wrap { flex-wrap: nowrap; }
   </style>
   <link rel="stylesheet" href="../css/tailwind-admin.css?v=4" />
 </head>
@@ -612,7 +618,7 @@
                 <h3 class="font-semibold text-lg">Répertoire des membres</h3>
                 <div class="flex items-center gap-3"><span id="member-count" class="text-sm text-slate-500">0 membre</span><button type="button" onclick="exportCSV('membres')" class="mini-btn bg-slate-100 text-slate-700">Exporter CSV</button></div>
               </div>
-              <div class="overflow-auto scrollbar-thin max-h-[760px] rounded-2xl border border-slate-200 bg-white">
+              <div class="admin-table-scroll overflow-auto scrollbar-thin max-h-[760px] rounded-2xl border border-slate-200 bg-white">
                 <table class="w-full text-sm">
                   <thead class="sticky top-0 bg-white">
                     <tr class="text-left text-slate-500 border-b border-slate-200">
@@ -704,7 +710,7 @@
               </div>
               <span id="audit-count" class="text-sm text-slate-500">0 action</span>
             </div>
-            <div class="overflow-auto scrollbar-thin max-h-[600px] rounded-2xl border border-slate-200 bg-white">
+            <div class="admin-table-scroll overflow-auto scrollbar-thin max-h-[600px] rounded-2xl border border-slate-200 bg-white">
               <table class="w-full text-sm">
                 <thead class="sticky top-0 bg-white">
                   <tr class="text-left text-slate-500 border-b border-slate-200">
