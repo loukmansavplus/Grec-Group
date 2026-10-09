@@ -3,6 +3,7 @@ module.exports = {
   content: ['./index.html', './pages/**/*.html', './js/**/*.js'],
   theme: {
     extend: {
+      opacity: { 8: '0.08', 72: '0.72', 78: '0.78' },
       colors: {
         gold: '#C8893A',
         'gold-light': '#E5A84B',

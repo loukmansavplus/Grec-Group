@@ -1702,3 +1702,7 @@ footer .brand-lockup .brand-title,
 footer .brand-lockup .logo-subtitle {
   display: none;
 }
+
+/* Label de section sur fond sombre */
+.section-label.text-gold-light { color: #E5A84B; }
+.section-label.text-gold-light::before { background: linear-gradient(90deg, #E5A84B, var(--gold)); }
