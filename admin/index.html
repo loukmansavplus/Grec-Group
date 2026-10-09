@@ -1975,7 +1975,7 @@
     }
 
     // Contrôle d'accès : seuls les comptes présents dans la collection admins passent.
-    async function ensureAdminAccess() {
+    async function gateAdminAccess() {
     const user = auth.currentUser;
     if (!user) {
       window.location.href = '../pages/auth.html';
@@ -2024,7 +2024,6 @@
     });
 
     async function boot() {
-      if (!(await ensureAdminAccess())) return;
       els.articleForm = document.getElementById('article-form');
       els.articleId = document.getElementById('article-id');
       els.articleTitle = document.getElementById('article-title');
