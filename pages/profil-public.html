@@ -417,7 +417,7 @@
       els.sector.textContent = secteur;
       els.location.textContent = location;
       els.bio.textContent = bio;
-      els.since.textContent = formatDate(data.createdAt);
+      els.since.textContent = data._depuis || formatDate(data.createdAt);
       els.accountState.textContent = data.statut || 'actif';
 
       els.badges.innerHTML = '';
@@ -498,6 +498,25 @@
       return found;
     }
 
+    // Profil reconstruit à partir de l'adresse (cartes de l'annuaire affiché aux visiteurs)
+    function profileFromQuery(params) {
+      const name = (params.get('name') || '').trim();
+      if (!name) return null;
+      return {
+        nom: name,
+        secteur: (params.get('secteur') || '').trim(),
+        pays: (params.get('pays') || '').trim(),
+        poste: (params.get('poste') || '').trim(),
+        bio: (params.get('bio') || '').trim(),
+        statut: 'actif',
+        publicProfileEnabled: true,
+        showPhoto: true,
+        showBio: true,
+        showLocation: true,
+        _depuis: (params.get('depuis') || '').trim()
+      };
+    }
+
     async function resolveProfile() {
       const params = new URLSearchParams(window.location.search);
       const uid = (params.get('uid') || '').trim();
@@ -506,11 +525,22 @@
       state.nameQuery = name;
 
       let data = null;
-      if (uid) {
-        data = await loadByUid(uid);
+      let dbError = null;
+      try {
+        if (uid) data = await loadByUid(uid);
+        if (!data && name) data = await loadByName(name);
+      } catch (err) {
+        dbError = err;
       }
-      if (!data && name) {
-        data = await loadByName(name);
+
+      if (!data) {
+        const fromQuery = profileFromQuery(params);
+        if (fromQuery) return fromQuery;
+      }
+      if (!data && dbError) {
+        const denied = dbError.code === 'permission-denied' || /permission/i.test(dbError.message || '');
+        const loginError = new Error(denied && !auth.currentUser ? 'login-required' : (dbError.message || 'Erreur inconnue'));
+        throw loginError;
       }
       return data;
     }
@@ -571,9 +601,23 @@
           els.editLink.href = 'profil.html';
         }
       } catch (err) {
-        els.title.textContent = 'Erreur de chargement';
-        els.subtitle.textContent = 'Impossible de charger ce profil public pour le moment.';
-        els.status.textContent = err.message || 'Erreur inconnue';
+        if (err.message === 'login-required') {
+          els.title.textContent = 'Connexion requise';
+          els.subtitle.innerHTML = 'Ce profil est réservé aux membres du réseau. <a href="auth.html" class="text-gold font-semibold underline">Se connecter</a> ou <a href="register.html" class="text-gold font-semibold underline">devenir membre</a>.';
+          els.status.textContent = 'Profil réservé aux membres';
+          els.name.textContent = 'Profil réservé';
+          els.poste.textContent = '-';
+          els.bio.textContent = 'Connectez-vous pour consulter ce profil.';
+          els.sector.textContent = '-';
+          els.location.textContent = '-';
+          els.since.textContent = '-';
+          els.accountState.textContent = '-';
+          els.badges.innerHTML = '';
+        } else {
+          els.title.textContent = 'Erreur de chargement';
+          els.subtitle.textContent = 'Impossible de charger ce profil public pour le moment.';
+          els.status.textContent = err.message || 'Erreur inconnue';
+        }
         hideSensitiveLinks();
       }
     });
