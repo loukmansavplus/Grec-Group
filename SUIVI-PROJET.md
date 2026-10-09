@@ -208,7 +208,7 @@ Si un chargement échoue, un **bandeau rouge** en haut de la page indique la col
 
 ### C. Sécurité
 - [ ] **Supprimer le fichier JSON de clé du compte de service** de tout ordinateur, et contrôler `API USEFULL`.
-- [ ] Vérification d'e-mail à l'inscription (`sendEmailVerification`).
+- [x] Vérification d'e-mail à l'inscription : e-mail envoyé (non bloquant). Pour l'exiger avant la connexion, tester `emailVerified` dans `auth.html`.
 - [ ] Restreindre la clé API Firebase au domaine du site (console Google Cloud, Identifiants).
 - [ ] Tester les règles Firestore cas par cas avec l'émulateur Firebase.
 - [ ] Décider de l'annuaire : aujourd'hui les vrais profils sont réservés aux connectés. Pour les montrer aux visiteurs, séparer les données publiques (nom, photo, secteur) des privées (e-mail, téléphone).
@@ -216,10 +216,10 @@ Si un chargement échoue, un **bandeau rouge** en haut de la page indique la col
 
 ### D. Qualité et performance
 - [x] CDN Tailwind remplacé par un CSS compilé (`css/tailwind.css`, `css/tailwind-admin.css`). **Après avoir ajouté ou changé des classes Tailwind : `npm install` puis `npm run build:css`, commiter les CSS générés et augmenter `?v=` dans les pages.**
-- [ ] Optimiser les images (WebP, tailles adaptées) ; `hero-equipe.jpg` pèse ≈ 400 Ko.
+- [x] Images lourdes recompressées (bannières, `hero-equipe.jpg`). Reste possible : conversion WebP.
 - [ ] Nettoyer le dépôt (`.agents/`, `.claude/` et `vercel.json` retirés le 9 octobre 2026).
-- [ ] Supprimer les doublons de fonctions entre `js/utils.js` et `js/contributions.js` (`formatDateFR`, `getMemberDisplayName`, `normalizeValidationStatus`, `getValidationLabel`).
-- [ ] Accessibilité : certains boutons `onclick` ne sont pas utilisables au clavier.
+- [~] Doublons `utils.js` / `contributions.js` : `formatDateFR` supprimé. Restent `getMemberDisplayName`, `normalizeValidationStatus`, `getValidationLabel` : comportements différents (emoji, logique de statut), à fusionner avec test connecté.
+- [x] Annuaire utilisable au clavier (Tab, Entrée, Espace). À revoir : autres `onclick` sur des éléments non interactifs.
 - [ ] Éventuellement d'autres icônes (« Qui sommes-nous », annuaire, galerie, menu).
 
 ### E. Livraison au client
@@ -255,3 +255,13 @@ node --check js/utils.js                    # vérifier la syntaxe d'un fichier 
 
 ## Crédits photos
 Bannières des pages Qui sommes-nous, Actualités, Galerie et Nos partenaires : photos libres de droits [Pexels](https://www.pexels.com/license/) (`Assets/images/banniere-*.jpg`), identifiants Pexels 30677714, 16856088, 8761674 et 13116381. Aucune mention obligatoire, mais à remplacer par de vraies photos du GREC dès qu'elles sont disponibles.
+
+---
+
+## Pièges connus
+
+- **Ordre des CSS** : dans chaque page, `css/tailwind*.css` doit rester **le dernier** `<link>`/`<style>` du `<head>` (comme l'ancien CDN). Sinon `style.css` écrase des classes comme `bg-navy` (ex. `.card`).
+- **Opacités Tailwind** : seules les valeurs de l'échelle (5, 10, 15 … 95) existent. `text-white/78` ne produit rien ; les valeurs 8, 72 et 78 sont déclarées dans `tailwind.config.js`.
+- **Globales Firebase** : `db`, `auth`, `COLLECTIONS` sont des `const` : tester `typeof db !== 'undefined'`, jamais `window.db`.
+- **Content-Security-Policy** (`firebase.json`) : toute nouvelle origine externe (script, police, API) doit y être ajoutée, sinon elle est bloquée.
+- **Cartes de membres de `membres.html`** : 12 fiches écrites en dur (Kofi Adjovi, Aïssatou Kéïta…) à vérifier : vrais membres ou exemples ?

@@ -75,3 +75,6 @@ node_modules/
 .agents/
 .claude/
 .refact/
+
+# Notes locales pouvant contenir des clés : ne jamais publier
+Assets/API USEFULL*

@@ -11,15 +11,7 @@ const contributionState = {
 };
 
 // ── Utilitaires ──────────────────────────────────────────────
-function formatDateFR(dateStr) {
-  if (!dateStr) return '';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-  } catch (e) {
-    return dateStr;
-  }
-}
+// formatDateFR() est fournie par utils.js
 
 function getMemberDisplayName(memberData, user) {
   if (memberData?.nom) return memberData.nom;

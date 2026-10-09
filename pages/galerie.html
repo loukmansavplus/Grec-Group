@@ -23,8 +23,7 @@
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet" />
 
-    <link rel="stylesheet" href="../css/tailwind.css?v=2" />
-    <link rel="stylesheet" href="../css/style.css?v=4" />
+    <link rel="stylesheet" href="../css/style.css?v=7" />
 
     <style>
         .hero-galerie {
@@ -284,6 +283,7 @@
             box-shadow: inset 0 -2px 0 #B9853B;
         }
     </style>
+    <link rel="stylesheet" href="../css/tailwind.css?v=4" />
 </head>
 
 <body class="font-body bg-white text-navy">
@@ -555,7 +555,7 @@
         <div class="lightbox-content">
             <button class="lightbox-close" onclick="closeLightbox()">?</button>
             <button class="lightbox-nav prev" onclick="prevGallery()">‹</button>
-            <img loading="lazy" decoding="async" id="lightbox-img" src="" alt="" />
+            <img loading="lazy" decoding="async" id="lightbox-img" alt="" />
             <button class="lightbox-nav next" onclick="nextGallery()">›</button>
         </div>
     </div>
@@ -620,7 +620,7 @@
                 img.innerHTML = `
           <img src="${escapeHtml(safeImageUrl(g.url) || '../Assets/images/hero.jpg')}" alt="${escapeHtml(g.titre || 'Photo GREC')}" loading="lazy" />
           <div class="gallery-overlay">
-            <a href="#" onclick="openLightbox(${idx}); return false;" title="Voir en grand">
+            <a href="#" onclick="openLightbox(${idx}); return false;" title="Voir en grand" aria-label="Voir en grand : ${escapeHtml(g.titre || 'Photo GREC')}">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>

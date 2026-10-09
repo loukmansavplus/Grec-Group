@@ -673,19 +673,6 @@ thead, tbody, tr, th, td {
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .form-input {
-    background: #1A2E42;
-    color: #f8f5ef;
-    border-color: #243C52;
-  }
-
-  .form-input::placeholder {
-    color: #718096;
-  }
-}
-
 /* ============================================================
    Professional UI Pass
    Visual-only refinements. Firebase hooks, IDs and JS contracts stay intact.
@@ -862,9 +849,13 @@ select:focus-visible {
   background: linear-gradient(180deg, transparent, rgba(7,25,39,0.32));
 }
 
-.hero-bg > .max-w-7xl,
-.hero-bg .scroll-indicator {
+.hero-bg > .max-w-7xl {
   position: relative;
+  z-index: 1;
+}
+
+.hero-bg .scroll-indicator {
+  position: absolute;
   z-index: 1;
 }
 
