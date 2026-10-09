@@ -409,6 +409,16 @@
             </div>
 
             <div class="flex-1 overflow-hidden">
+              <div id="legacy-import-box" class="hidden mb-5 rounded-2xl border border-gold/40 bg-amber-50 p-4">
+                <div class="font-semibold text-navy mb-1">Articles de l'ancien site</div>
+                <p class="text-sm text-slate-600 mb-3">
+                  Les articles repris de grec.group ne sont pas encore dans la base : ils s'affichent sur le site mais
+                  ne sont pas modifiables ici. Importez-les pour pouvoir les modifier ou les supprimer comme les autres.
+                  <strong>À faire avant d'ajouter un nouvel article</strong>, sinon seul le nouvel article s'affichera sur le site.
+                </p>
+                <button type="button" onclick="importLegacyArticles()" class="mini-btn bg-gold text-white">Importer les articles</button>
+              </div>
+
               <div class="flex items-center justify-between mb-4">
                 <h3 class="font-semibold text-lg">Derniers articles</h3>
                 <span id="article-count" class="text-sm text-slate-500">0 article</span>
@@ -618,7 +628,7 @@
             <div class="flex-1 overflow-hidden">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="font-semibold text-lg">Répertoire des membres</h3>
-                <span id="member-count" class="text-sm text-slate-500">0 membre</span>
+                <div class="flex items-center gap-3"><span id="member-count" class="text-sm text-slate-500">0 membre</span><button type="button" onclick="exportCSV('membres')" class="mini-btn bg-slate-100 text-slate-700">Exporter CSV</button></div>
               </div>
               <div class="overflow-auto scrollbar-thin max-h-[760px] rounded-2xl border border-slate-200 bg-white">
                 <table class="w-full text-sm">
@@ -646,7 +656,7 @@
                   <h2 class="font-display text-2xl font-bold text-navy">Contacts</h2>
                   <p class="text-sm text-slate-500">Les messages reçus depuis le formulaire de contact.</p>
                 </div>
-                <span id="contact-count" class="text-sm text-slate-500">0 message</span>
+                <div class="flex items-center gap-3"><span id="contact-count" class="text-sm text-slate-500">0 message</span><button type="button" onclick="exportCSV('contacts')" class="mini-btn bg-slate-100 text-slate-700">Exporter CSV</button></div>
               </div>
               <input id="contact-search" class="field mb-3" placeholder="Rechercher un contact..." />
               <div id="contact-list" class="space-y-3 max-h-[460px] overflow-auto scrollbar-thin pr-2"></div>
@@ -658,7 +668,7 @@
                   <h2 class="font-display text-2xl font-bold text-navy">Newsletter</h2>
                   <p class="text-sm text-slate-500">Les inscriptions à la newsletter du réseau.</p>
                 </div>
-                <span id="newsletter-count" class="text-sm text-slate-500">0 inscription</span>
+                <div class="flex items-center gap-3"><span id="newsletter-count" class="text-sm text-slate-500">0 inscription</span><button type="button" onclick="exportCSV('newsletter')" class="mini-btn bg-slate-100 text-slate-700">Exporter CSV</button></div>
               </div>
               <input id="newsletter-search" class="field mb-3" placeholder="Rechercher un abonné..." />
               <div id="newsletter-list" class="space-y-3 max-h-[460px] overflow-auto scrollbar-thin pr-2"></div>
@@ -679,6 +689,7 @@
                     contenu du site.</p>
                   <button onclick="createAdminAccount()" class="mini-btn bg-gold text-white w-full">+ Créer un compte
                     admin</button>
+                  <div id="admin-list" class="mt-4 space-y-2"></div>
                 </div>
 
                 <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -740,6 +751,7 @@
 
   <script src="../js/firebase-config.js?v=3"></script>
   <script src="../js/utils.js?v=3"></script>
+  <script src="../js/articles-data.js?v=3"></script>
 
   <script>
     const adminState = {
@@ -889,6 +901,10 @@
           categorie: 'actualite',
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
+
+        if (adminState.article?.imagePosition && url !== (adminState.article?.imageURL || '')) {
+          payload.imagePosition = 'center top';
+        }
 
         if (isPublished && !adminState.article?.publishedAt) {
           payload.publishedAt = firebase.firestore.FieldValue.serverTimestamp();
@@ -1762,8 +1778,128 @@
       els.newsletterList.innerHTML = renderMessageList(newsletter, 'newsletter');
 
       await loadAuditLog();
+      renderLegacyBox();
+      await loadAdminsList();
 
       bindEditButtons();
+    }
+
+    // ── Import des articles de l'ancien site dans la base ─────────────
+    const FR_MONTHS = { 'Janvier': 0, 'Février': 1, 'Mars': 2, 'Avril': 3, 'Mai': 4, 'Juin': 5, 'Juillet': 6, 'Août': 7, 'Septembre': 8, 'Octobre': 9, 'Novembre': 10, 'Décembre': 11 };
+
+    function renderLegacyBox() {
+      const box = document.getElementById('legacy-import-box');
+      if (!box) return;
+      const already = (adminState.articles || []).some(item => item.legacyId);
+      box.classList.toggle('hidden', already || !(window.GREC_ARTICLES || []).length);
+    }
+
+    async function importLegacyArticles() {
+      const legacy = window.GREC_ARTICLES || [];
+      if (!legacy.length) return;
+      if (!confirm(`Importer les ${legacy.length} articles de l'ancien site dans la base ?\nIls pourront ensuite être modifiés ou supprimés ici.`)) return;
+      try {
+        const batch = db.batch();
+        legacy.forEach(item => {
+          const date = new Date(Number(item.annee), FR_MONTHS[item.mois] ?? 0, parseInt(item.jour, 10), 12, 0, 0);
+          const image = '/Assets/images/' + item.image;
+          batch.set(db.collection(COLLECTIONS.ACTUALITES).doc('legacy-' + item.id), {
+            titre: item.titre,
+            titreCourt: item.titreCourt || item.titre,
+            resume: item.resume,
+            contenu: (item.contenu || []).join('\n\n'),
+            imageURL: image,
+            image: image,
+            imagePosition: item.imagePosition || 'center top',
+            publie: true,
+            une: false,
+            validationStatus: VALIDATION_STATUS.APPROVED,
+            auteur: 'GREC',
+            authorUid: adminState.user?.uid || '',
+            authorName: getAdminName(adminState.user),
+            authorEmail: adminState.user?.email || '',
+            categorie: 'actualite',
+            legacyId: item.id,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            publishedAt: firebase.firestore.Timestamp.fromDate(date),
+            reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            reviewedBy: adminState.user?.uid || ''
+          });
+        });
+        await batch.commit();
+        logAdminAction('import-legacy-articles', 'legacy', { count: legacy.length });
+        showToast(`${legacy.length} articles importés`, 'success');
+        await refreshAll();
+      } catch (error) {
+        console.error('Erreur import:', error);
+        showToast('Import impossible : ' + error.message, 'error');
+      }
+    }
+
+    // ── Export CSV (contacts, newsletter, membres) ────────────────────
+    function csvCell(value) {
+      let text = '';
+      if (value && typeof value.toDate === 'function') text = value.toDate().toISOString().slice(0, 10);
+      else if (value != null) text = String(value);
+      if (/^[=+\-@\t\r]/.test(text)) text = "'" + text; // évite l'exécution de formules dans Excel
+      return '"' + text.replace(/"/g, '""') + '"';
+    }
+
+    function exportCSV(kind) {
+      const defs = {
+        contacts: { file: 'contacts', rows: adminState.contacts, cols: [['Date', 'createdAt'], ['Nom', 'nom'], ['Email', 'email'], ['Message', 'message'], ['Source', 'source']] },
+        newsletter: { file: 'newsletter', rows: adminState.newsletter, cols: [['Date', 'subscribedAt'], ['Email', 'email']] },
+        membres: { file: 'membres', rows: adminState.members, cols: [['Nom', m => getMemberDisplayName(m)], ['Email', 'email'], ['Téléphone', 'telephone'], ['Pays', 'pays'], ['Secteur', 'secteur'], ['Statut', 'statut'], ['Inscription', 'createdAt']] }
+      };
+      const def = defs[kind];
+      if (!def || !(def.rows || []).length) { showToast('Rien à exporter pour le moment.', 'info'); return; }
+      const lines = [def.cols.map(c => csvCell(c[0])).join(';')];
+      def.rows.forEach(row => lines.push(def.cols.map(c => csvCell(typeof c[1] === 'function' ? c[1](row) : row[c[1]])).join(';')));
+      const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `grec-${def.file}-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      logAdminAction('export-csv', kind, { count: def.rows.length });
+    }
+
+    // ── Liste des administrateurs ─────────────────────────────────────
+    async function loadAdminsList() {
+      const host = document.getElementById('admin-list');
+      if (!host) return;
+      try {
+        const snap = await db.collection(COLLECTIONS.ADMINS).get();
+        const rows = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        host.innerHTML = rows.length ? rows.map(item => `
+          <div class="flex items-center justify-between gap-3 rounded-xl bg-white border border-slate-200 px-3 py-2">
+            <div class="min-w-0">
+              <div class="text-sm font-semibold text-navy truncate">${escapeHtml(item.name || item.email || item.id)}</div>
+              <div class="text-xs text-slate-500 truncate">${escapeHtml(item.email || '')}</div>
+            </div>
+            ${item.id === adminState.user?.uid
+              ? '<span class="badge badge-gold">Vous</span>'
+              : `<button type="button" class="mini-btn bg-red-50 text-red-600" onclick="removeAdmin('${escapeHtml(item.id)}')">Retirer</button>`}
+          </div>`).join('') : '<p class="text-xs text-slate-500">Aucun administrateur.</p>';
+      } catch (error) {
+        host.innerHTML = '<p class="text-xs text-red-600">Liste des administrateurs indisponible.</p>';
+      }
+    }
+
+    async function removeAdmin(id) {
+      if (!id || id === adminState.user?.uid) return;
+      if (!confirm('Retirer les droits administrateur de ce compte ? Il restera simple membre.')) return;
+      try {
+        await db.collection(COLLECTIONS.ADMINS).doc(id).delete();
+        logAdminAction('remove-admin', id);
+        showToast('Droits administrateur retirés', 'success');
+        await loadAdminsList();
+      } catch (error) {
+        showToast('Erreur : ' + error.message, 'error');
+      }
     }
 
     async function createAdminAccount() {
@@ -1791,6 +1927,7 @@
         await db.collection(COLLECTIONS.ADMINS).doc(found.docs[0].id).set(adminData);
         showToast(`Compte admin créé pour ${email}`, 'success');
         await refreshAll();
+        await loadAdminsList();
       } catch (error) {
         showToast('Erreur lors de la création du compte admin', 'error');
         console.error(error);

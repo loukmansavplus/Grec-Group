@@ -983,7 +983,7 @@
             ${a.dateLabel ? `<div class="absolute top-3 left-3 bg-gold text-white text-xs font-semibold pl-2.5 pr-3 py-1 rounded-full inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>${escapeHtml(a.dateLabel)}</div>` : ''}
           </a>
           <div class="p-6 flex flex-col flex-grow">
-            <h3 class="font-display font-semibold text-navy text-lg leading-tight mb-3 group-hover:text-gold transition-colors">
+            <h3 class="font-display font-semibold text-navy text-lg leading-tight mb-3 group-hover:text-gold transition-colors line-clamp-3">
               <a href="${escapeHtml(a.href)}">${escapeHtml(a.titre)}</a>
             </h3>
             <p class="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-3 flex-grow">${escapeHtml(a.resume)}</p>
@@ -1013,34 +1013,28 @@
     }
 
     async function loadActualites() {
+      // Articles de la base (gérés depuis l'admin) ; sinon articles repris de l'ancien site
       const base = repriseArticles();
-      renderHomeArticles(base);
       try {
-        const snap = await db.collection(COLLECTIONS.ACTUALITES)
-          .where('publie', '==', true)
-          .orderBy('publishedAt', 'desc')
-          .limit(4)
-          .get();
-        if (snap.empty) return;
-
-        const known = new Set(base.map((a) => a.titre.trim().toLowerCase()));
-        const fromDb = [];
-        snap.docs.forEach((doc) => {
+        const snap = await Promise.race([
+          db.collection(COLLECTIONS.ACTUALITES).where('publie', '==', true).orderBy('publishedAt', 'desc').limit(4).get(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+        ]);
+        const fromDb = snap.docs.map((doc) => {
           const a = doc.data() || {};
-          const titre = String(a.titre || '').trim();
-          if (!titre || known.has(titre.toLowerCase())) return;
-          fromDb.push({
-            titre,
+          return {
+            titre: String(a.titreCourt || a.titre || '').trim(),
             resume: String(a.resume || a.description || '').trim(),
             dateLabel: formatDateFR(a.publishedAt),
             img: safeImageUrl(a.imageURL || a.image),
-            imgPos: 'center top',
-            href: 'pages/actualites.html'
-          });
-        });
-        if (fromDb.length) renderHomeArticles(fromDb.concat(base));
+            imgPos: a.imagePosition || 'center top',
+            href: 'pages/actualites.html?article=' + encodeURIComponent(doc.id)
+          };
+        }).filter((a) => a.titre);
+        renderHomeArticles(fromDb.length ? fromDb : base);
       } catch (e) {
         console.log('Firestore indisponible, articles repris affichés.');
+        renderHomeArticles(base);
       }
     }
 

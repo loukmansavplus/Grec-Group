@@ -676,6 +676,17 @@
     </div>
   </section>
 
+  <!-- ------------------- ÉVÉNEMENTS À VENIR (publiés depuis l'admin) ------------------- -->
+  <section id="events-section" class="hidden py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-10">
+        <div class="section-label justify-center reveal">Agenda</div>
+        <h2 class="font-display text-3xl md:text-4xl font-semibold text-navy reveal">Événements à venir</h2>
+      </div>
+      <div id="events-container" class="grid md:grid-cols-2 gap-6"></div>
+    </div>
+  </section>
+
   <!-- ------------------- NEWSLETTER ------------------- -->
   <section class="py-16 bg-navy">
     <div class="max-w-2xl mx-auto px-6 text-center">
@@ -1073,35 +1084,87 @@
       }));
     }
 
-    // -- Articles ajoutés depuis l'admin (Firestore, publiés) : affichés avant les articles repris --
-    async function loadArticlesFromFirestore() {
+    // -- Articles publiés dans la base (gérés depuis l'admin) --
+    // Si la base est vide ou inaccessible, on affiche les articles repris de l'ancien site.
+    async function fetchPublishedArticles() {
+      const snap = await db.collection(COLLECTIONS.ACTUALITES)
+        .where('publie', '==', true).orderBy('publishedAt', 'desc').limit(60).get();
+      const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+      return snap.docs.map((doc) => {
+        const d = doc.data() || {};
+        const dt = d.publishedAt?.toDate ? d.publishedAt.toDate() : null;
+        const body = String(d.contenu || d.content || d.description || d.resume || '');
+        return {
+          key: 'f' + doc.id,
+          titre: String(d.titre || '').trim(),
+          resume: String(d.resume || d.description || '').trim(),
+          paragraphs: body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean),
+          dateLabel: dt ? `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}` : '',
+          img: safeImageUrl(d.imageURL || d.image),
+          imgPos: d.imagePosition || 'center top'
+        };
+      }).filter((a) => a.titre);
+    }
+
+    async function initArticles() {
+      let list = [];
       try {
-        const snap = await db.collection(COLLECTIONS.ACTUALITES)
-          .where('publie', '==', true).orderBy('publishedAt', 'desc').limit(24).get();
-        if (snap.empty) return;
-        const known = new Set(allArticlesData.map((a) => a.titre.trim().toLowerCase()));
-        const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-        const fromDb = [];
-        snap.docs.forEach((doc) => {
-          const d = doc.data() || {};
-          const titre = String(d.titre || '').trim();
-          if (!titre || known.has(titre.toLowerCase())) return;
-          const dt = d.publishedAt?.toDate ? d.publishedAt.toDate() : null;
-          const body = String(d.contenu || d.content || d.description || d.resume || '');
-          fromDb.push({
-            key: 'f' + doc.id,
-            titre,
-            resume: String(d.resume || d.description || '').trim(),
-            paragraphs: body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean),
-            dateLabel: dt ? `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}` : '',
-            img: safeImageUrl(d.imageURL || d.image),
-            imgPos: 'center top'
-          });
-        });
-        if (!fromDb.length) return;
-        allArticlesData = fromDb.concat(allArticlesData);
-        renderArticlesPage();
+        list = await Promise.race([
+          fetchPublishedArticles(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+        ]);
       } catch (e) { console.log('Articles Firestore indisponibles', e); }
+      allArticlesData = list.length ? list : staticArticles();
+      renderArticlesPage();
+      openArticleFromUrl();
+    }
+
+    // Lien direct : actualites.html?article=<numéro ou identifiant>
+    function openArticleFromUrl() {
+      const wanted = new URLSearchParams(window.location.search).get('article');
+      if (!wanted) return;
+      const idx = allArticlesData.findIndex((a) => a.key === 'a' + wanted || a.key === 'f' + wanted);
+      if (idx >= 0) {
+        currentPage = Math.floor(idx / ARTICLES_PER_PAGE) + 1;
+        renderArticlesPage();
+        openArticleDetail(idx);
+      }
+    }
+
+    // -- Événements à venir (publiés depuis l'admin) --
+    async function loadUpcomingEvents() {
+      try {
+        const snap = await db.collection(COLLECTIONS.EVENEMENTS)
+          .where('publie', '==', true).orderBy('date', 'asc').limit(24).get();
+        const today = new Date().toISOString().slice(0, 10);
+        const events = snap.docs.map((doc) => doc.data() || {})
+          .filter((e) => e.titre && e.date && String(e.date) >= today)
+          .slice(0, 6);
+        if (!events.length) return;
+        const months = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
+        document.getElementById('events-container').innerHTML = events.map((e) => {
+          const dt = new Date(e.date + 'T12:00:00');
+          const img = safeImageUrl(e.imageURL);
+          return `
+            <article class="card reveal overflow-hidden flex flex-col sm:flex-row">
+              ${img ? `<div class="sm:w-40 h-40 sm:h-auto flex-shrink-0 bg-navy-mid"><img src="${escapeHTML(img)}" alt="" loading="lazy" class="w-full h-full object-cover" onerror="this.remove()" /></div>` : ''}
+              <div class="p-6 flex gap-4 flex-grow">
+                <div class="text-center bg-gold text-white rounded-xl px-3 py-2 self-start min-w-[56px]">
+                  <div class="text-2xl font-bold font-display leading-none">${escapeHTML(String(dt.getDate()).padStart(2, '0'))}</div>
+                  <div class="text-xs opacity-90 mt-1 uppercase">${escapeHTML(months[dt.getMonth()] || '')}</div>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="font-display font-semibold text-navy text-lg leading-snug mb-1">${escapeHTML(e.titre)}</h3>
+                  ${e.lieu ? `<div class="text-xs text-gold font-medium mb-2 inline-flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${escapeHTML(e.lieu)}</div>` : ''}
+                  ${e.description ? `<p class="text-slate-500 text-sm leading-relaxed line-clamp-3">${escapeHTML(e.description)}</p>` : ''}
+                </div>
+              </div>
+            </article>`;
+        }).join('');
+        document.getElementById('events-section').classList.remove('hidden');
+        initScrollReveal();
+      } catch (e) { console.log('Événements indisponibles', e); }
     }
 
     // -- Liste + pagination --
@@ -1228,20 +1291,8 @@
 
     // Init
     initNavbar(); initMobileMenu(); initScrollReveal(); initAuthState();
-    allArticlesData = staticArticles();
-    renderArticlesPage();
-    loadArticlesFromFirestore();
-    // Lien direct vers un article : actualites.html?article=<numéro>
-    (function () {
-      const wanted = new URLSearchParams(window.location.search).get('article');
-      if (!wanted) return;
-      const idx = allArticlesData.findIndex((a) => a.key === 'a' + wanted);
-      if (idx >= 0) {
-        currentPage = Math.floor(idx / ARTICLES_PER_PAGE) + 1;
-        renderArticlesPage();
-        openArticleDetail(idx);
-      }
-    })();
+    initArticles();
+    loadUpcomingEvents();
   </script>
 
   <!-- Floating Chat Button -->
