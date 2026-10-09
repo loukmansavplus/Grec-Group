@@ -4,3 +4,5 @@ Disallow: /pages/auth.html
 Disallow: /pages/register.html
 Disallow: /pages/chat.html
 Disallow: /pages/profil.html
+
+Sitemap: https://grec-group.web.app/sitemap.xml
