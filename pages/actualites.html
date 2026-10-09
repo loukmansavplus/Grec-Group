@@ -1125,7 +1125,7 @@
           <article class="card reveal group overflow-hidden flex flex-col">
             <a href="#article-${i}" data-open="${i}" class="relative block overflow-hidden aspect-square bg-navy-mid" aria-label="Lire : ${escapeHTML(a.titre)}">
               ${photo}
-              ${a.dateLabel ? `<div class="absolute top-3 left-3 bg-gold text-white text-xs font-semibold px-3 py-1 rounded-full">${escapeHTML(a.dateLabel)}</div>` : ''}
+              ${a.dateLabel ? `<div class="absolute top-3 left-3 bg-gold text-white text-xs font-semibold pl-2.5 pr-3 py-1 rounded-full inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>${escapeHTML(a.dateLabel)}</div>` : ''}
             </a>
             <div class="p-6 flex flex-col flex-grow">
               <h3 class="font-display font-semibold text-navy text-lg leading-snug mb-3 group-hover:text-gold transition-colors line-clamp-4">
