@@ -1708,7 +1708,18 @@
       }
     }
 
+    // Chargement complet du tableau de bord ; toute erreur est affichée (et non plus silencieuse)
     async function refreshAll() {
+      try {
+        await refreshAllData();
+      } catch (error) {
+        console.error('Erreur de chargement du tableau de bord:', error);
+        showToast('Chargement incomplet du tableau de bord : ' + (error.code || '') + ' ' + (error.message || error), 'error', 15000);
+      }
+      renderLegacyBox();
+    }
+
+    async function refreshAllData() {
       const [members, articles, events, gallery, contacts, newsletter, contributions, partners] = await Promise.all([
         fetchCollection(COLLECTIONS.MEMBRES, 'createdAt', 'desc'),
         fetchCollection(COLLECTIONS.ACTUALITES, 'publishedAt', 'desc'),
@@ -1722,6 +1733,7 @@
 
       adminState.members = members;
       adminState.articles = articles;
+      adminState.articlesLoaded = true;
       adminState.events = events;
       adminState.galleryItems = gallery;
       adminState.contacts = contacts;
@@ -1790,6 +1802,7 @@
     function renderLegacyBox() {
       const box = document.getElementById('legacy-import-box');
       if (!box) return;
+      if (!adminState.articlesLoaded) return; // liste non chargée : on ne propose pas l'import
       const already = (adminState.articles || []).some(item => item.legacyId);
       box.classList.toggle('hidden', already || !(window.GREC_ARTICLES || []).length);
     }
