@@ -218,7 +218,7 @@ Si un chargement échoue, un **bandeau rouge** en haut de la page indique la col
 - [ ] Remplacer le CDN Tailwind (`cdn.tailwindcss.com`) par un CSS compilé (plus rapide, sans clignotement).
 - [ ] Optimiser les images (WebP, tailles adaptées) ; `hero-equipe.jpg` pèse ≈ 400 Ko.
 - [ ] `sitemap.xml`, balises de partage (Open Graph) et `canonical` sur les autres pages.
-- [ ] Nettoyer le dépôt (`.agents/`, `.claude/` et `vercel.json` retirés le 9 octobre 2026) : les `.md` de travail (`DEPLOYMENT.md`, `REFONTE.md`, `AMÉLIORATIONS_DASHBOARD.md`, `DASHBOARD_TEST.md`) sont probablement obsolètes.
+- [ ] Nettoyer le dépôt (`.agents/`, `.claude/` et `vercel.json` retirés le 9 octobre 2026).
 - [ ] Supprimer les doublons de fonctions entre `js/utils.js` et `js/contributions.js` (`formatDateFR`, `getMemberDisplayName`, `normalizeValidationStatus`, `getValidationLabel`).
 - [ ] Accessibilité : certains boutons `onclick` ne sont pas utilisables au clavier.
 - [ ] Éventuellement d'autres icônes (« Qui sommes-nous », annuaire, galerie, menu).
