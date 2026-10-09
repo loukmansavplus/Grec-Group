@@ -278,6 +278,7 @@
       </header>
 
       <div class="px-5 lg:px-8 py-6 space-y-6">
+        <div id="admin-error-banner" class="hidden rounded-2xl border border-red-200 bg-red-50 text-red-700 text-sm p-4" role="alert"></div>
         <section id="overview" class="section-card p-6 lg:p-8">
           <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
             <div>
@@ -755,6 +756,7 @@
 
   <script>
     const adminState = {
+      loadErrors: [],
       user: null,
       article: null,
       event: null,
@@ -1714,26 +1716,50 @@
         await refreshAllData();
       } catch (error) {
         console.error('Erreur de chargement du tableau de bord:', error);
-        showToast('Chargement incomplet du tableau de bord : ' + (error.code || '') + ' ' + (error.message || error), 'error', 15000);
+        showAdminError(['Chargement interrompu : ' + (error.code || '') + ' ' + (error.message || error)]);
       }
       renderLegacyBox();
     }
 
+    function showAdminError(lines) {
+      const banner = document.getElementById('admin-error-banner');
+      if (!banner) return;
+      const list = (lines || []).filter(Boolean);
+      banner.classList.toggle('hidden', !list.length);
+      banner.innerHTML = list.length
+        ? '<strong>Le tableau de bord n\'a pas pu charger certaines données :</strong><ul class="list-disc pl-5 mt-1">' + list.map(l => `<li>${escapeHtml(l)}</li>`).join('') + '</ul>'
+        : '';
+    }
+
+    // Lit une collection ; en cas d'erreur, la signale dans le bandeau et renvoie une liste vide
+    async function safeFetch(collectionName, orderField, direction) {
+      try {
+        const rows = await fetchCollection(collectionName, orderField, direction);
+        if (collectionName === COLLECTIONS.ACTUALITES) adminState.articlesLoaded = true;
+        return rows;
+      } catch (error) {
+        console.error('Lecture impossible :', collectionName, error);
+        adminState.loadErrors.push(`${collectionName} : ${error.code || ''} ${error.message || error}`.trim());
+        return [];
+      }
+    }
+
     async function refreshAllData() {
+      adminState.loadErrors = [];
+      adminState.articlesLoaded = false;
       const [members, articles, events, gallery, contacts, newsletter, contributions, partners] = await Promise.all([
-        fetchCollection(COLLECTIONS.MEMBRES, 'createdAt', 'desc'),
-        fetchCollection(COLLECTIONS.ACTUALITES, 'publishedAt', 'desc'),
-        fetchCollection(COLLECTIONS.EVENEMENTS, 'date', 'desc'),
-        fetchCollection(COLLECTIONS.GALERIE, 'uploadedAt', 'desc'),
-        fetchCollection(COLLECTIONS.CONTACTS, 'createdAt', 'desc'),
-        fetchCollection(COLLECTIONS.NEWSLETTER, 'subscribedAt', 'desc'),
-        fetchCollection(COLLECTIONS.CONTRIBUTIONS, 'createdAt', 'desc'),
-        fetchCollection(COLLECTIONS.PARTENAIRES, 'createdAt', 'desc')
+        safeFetch(COLLECTIONS.MEMBRES, 'createdAt', 'desc'),
+        safeFetch(COLLECTIONS.ACTUALITES, 'publishedAt', 'desc'),
+        safeFetch(COLLECTIONS.EVENEMENTS, 'date', 'desc'),
+        safeFetch(COLLECTIONS.GALERIE, 'uploadedAt', 'desc'),
+        safeFetch(COLLECTIONS.CONTACTS, 'createdAt', 'desc'),
+        safeFetch(COLLECTIONS.NEWSLETTER, 'subscribedAt', 'desc'),
+        safeFetch(COLLECTIONS.CONTRIBUTIONS, 'createdAt', 'desc'),
+        safeFetch(COLLECTIONS.PARTENAIRES, 'createdAt', 'desc')
       ]);
 
       adminState.members = members;
       adminState.articles = articles;
-      adminState.articlesLoaded = true;
       adminState.events = events;
       adminState.galleryItems = gallery;
       adminState.contacts = contacts;
@@ -1790,6 +1816,7 @@
       els.newsletterList.innerHTML = renderMessageList(newsletter, 'newsletter');
 
       await loadAuditLog();
+      showAdminError(adminState.loadErrors);
       renderLegacyBox();
       await loadAdminsList();
 
@@ -1987,6 +2014,14 @@
         console.error('Erreur lors du log:', error);
       }
     }
+
+    window.addEventListener('error', (event) => {
+      showAdminError(['Erreur de script : ' + (event.message || 'inconnue') + (event.lineno ? ` (ligne ${event.lineno})` : '')]);
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+      const reason = event.reason || {};
+      showAdminError(['Erreur : ' + (reason.code || '') + ' ' + (reason.message || reason)]);
+    });
 
     async function boot() {
       if (!(await ensureAdminAccess())) return;
