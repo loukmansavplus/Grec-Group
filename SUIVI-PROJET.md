@@ -215,7 +215,7 @@ Si un chargement échoue, un **bandeau rouge** en haut de la page indique la col
 - [ ] Éventuellement : App Check, limitation des envois de formulaires.
 
 ### D. Qualité et performance
-- [ ] Remplacer le CDN Tailwind (`cdn.tailwindcss.com`) par un CSS compilé (plus rapide, sans clignotement).
+- [x] CDN Tailwind remplacé par un CSS compilé (`css/tailwind.css`, `css/tailwind-admin.css`). **Après avoir ajouté ou changé des classes Tailwind : `npm install` puis `npm run build:css`, commiter les CSS générés et augmenter `?v=` dans les pages.**
 - [ ] Optimiser les images (WebP, tailles adaptées) ; `hero-equipe.jpg` pèse ≈ 400 Ko.
 - [ ] Nettoyer le dépôt (`.agents/`, `.claude/` et `vercel.json` retirés le 9 octobre 2026).
 - [ ] Supprimer les doublons de fonctions entre `js/utils.js` et `js/contributions.js` (`formatDateFR`, `getMemberDisplayName`, `normalizeValidationStatus`, `getValidationLabel`).

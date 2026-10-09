@@ -4,9 +4,13 @@
   "version": "1.0.0",
   "description": "GREC site and maintenance utilities",
   "scripts": {
-    "migrate:membres": "node scripts/migrate-auth-to-members.js"
+    "migrate:membres": "node scripts/migrate-auth-to-members.js",
+    "build:css": "tailwindcss -c tailwind.config.js -i build/tailwind-input.css -o css/tailwind.css --minify && tailwindcss -c tailwind.admin.config.js -i build/tailwind-input.css -o css/tailwind-admin.css --minify"
   },
   "dependencies": {
     "firebase-admin": "^12.7.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
   }
 }
