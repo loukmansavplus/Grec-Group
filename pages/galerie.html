@@ -29,7 +29,7 @@
     <style>
         .hero-galerie {
             background: linear-gradient(135deg, rgba(13, 27, 42, 0.95) 0%, rgba(13, 27, 42, 0.75) 100%),
-                url('../Assets/images/galerie-1.jpeg') center/cover no-repeat;
+                url('../Assets/images/banniere-galerie.jpg') center 35%/cover no-repeat;
             background-attachment: fixed;
         }
 
@@ -581,7 +581,6 @@
             { url: '../Assets/images/plage1.jpeg', titre: 'Rencontre sur la plage', categorie: 'plage' },
             { url: '../Assets/images/plage2.jpeg', titre: 'Échanges terrain', categorie: 'plage' },
             { url: '../Assets/images/hero.jpg', titre: 'RDV de la diaspora', categorie: 'diaspora' },
-            { url: '../Assets/images/actualites-hero.jpg', titre: 'Panel entrepreneurial', categorie: 'diaspora' },
             { url: '../Assets/images/action-sociale.jpg', titre: 'Action sociale', categorie: 'diaspora' },
             { url: '../Assets/images/galerie-1.jpeg', titre: 'Moment réseau', categorie: 'reunions' },
             { url: '../Assets/images/Rencontres.jpeg', titre: 'Rencontre membres', categorie: 'reunions' },
@@ -601,7 +600,7 @@
             const txt = `${url} ${titre} ${description}`;
 
             // Exclure explicitement les images indésirables (logo / captures de menu)
-            const blockedKeywords = ['logo', 'capture', 'screenshot', 'menu', 'navbar'];
+            const blockedKeywords = ['logo', 'capture', 'screenshot', 'menu', 'navbar', 'actualites-hero'];
             const hasBlockedKeyword = blockedKeywords.some(k => txt.includes(k));
             const isLogoAsset = url.includes('/logo.png') || url.endsWith('logo.png');
             return !(hasBlockedKeyword || isLogoAsset);
