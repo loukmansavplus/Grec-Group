@@ -250,3 +250,8 @@ gh run list --repo loukmansavplus/Grec-Group --limit 3     # état des déploiem
 gh run view <id> --log                      # détail d'un déploiement
 node --check js/utils.js                    # vérifier la syntaxe d'un fichier JS
 ```
+
+---
+
+## Crédits photos
+Bannières des pages Qui sommes-nous, Actualités, Galerie et Nos partenaires : photos libres de droits [Pexels](https://www.pexels.com/license/) (`Assets/images/banniere-*.jpg`), identifiants Pexels 30677714, 16856088, 8761674 et 13116381. Aucune mention obligatoire, mais à remplacer par de vraies photos du GREC dès qu'elles sont disponibles.
