@@ -87,6 +87,18 @@
       display: inline-flex;
       position: relative;
       z-index: 1;
+      align-self: flex-start;
+      width: fit-content;
+      background: none;
+      border: 0;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .auth-visual .brand-lockup img {
+      height: 56px;
+      max-width: none;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
     }
 
     .visual-tagline {
@@ -547,16 +559,8 @@
 
   <!-- ═══ LEFT — Visual panel ═══ -->
   <div class="auth-visual">
-    <a href="../index.html" class="brand-lockup flex items-center gap-3">
-      <img src="../Assets/images/logo.png" alt="GREC" class="h-10 object-contain"
-        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
-      <div
-        class="hidden items-center justify-center w-10 h-10 rounded-xl bg-gold text-white font-display font-bold text-lg">
-        G</div>
-      <div>
-        <div class="brand-title font-display font-semibold text-lg leading-tight">GREC</div>
-        <div class="logo-subtitle text-xs">Bénin · Diaspora</div>
-      </div>
+    <a href="../index.html" class="brand-lockup" aria-label="GREC - Accueil">
+      <img src="../Assets/images/logo-neutre.png" alt="GREC" />
     </a>
 
     <div class="visual-tagline">
