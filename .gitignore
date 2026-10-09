@@ -70,3 +70,8 @@ node_modules/
 
 # Outils / agents
 .refact/
+
+# Outils / agents IA (locaux)
+.agents/
+.claude/
+.refact/
