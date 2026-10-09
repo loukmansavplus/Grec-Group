@@ -680,99 +680,7 @@
       </div>
 
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6" id="articles-grid">
-
-
-        <article class="card reveal group overflow-hidden">
-          <div class="relative overflow-hidden aspect-square">
-            <img src="Assets/images/new_1635496633_0191.jpeg" alt="Jocelyne Marina Duval"
-              class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-              onerror="this.parentElement.style.background='#1A2E42'" />
-            <div class="absolute top-3 left-3 bg-gold text-white text-xs font-semibold px-3 py-1 rounded-full">
-              22 Oct 2021
-            </div>
-          </div>
-          <div class="p-6">
-            <h3
-              class="font-display font-semibold text-navy text-lg leading-tight mb-3 group-hover:text-gold transition-colors">
-              Jocelyne Marina Duval, fondatrice de la marque de parfumerie APONIE
-            </h3>
-            <p class="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-3">
-              À la découverte de cette française d'origine béninoise qui tutoie les grands noms de la parfumerie en
-              Europe.
-            </p>
-            <a href="pages/actualites.html"
-              class="text-gold text-sm font-medium hover:underline inline-flex items-center gap-1">
-              Lire l'article <span>→</span>
-            </a>
-          </div>
-        </article>
-
-
-        <article class="card reveal group overflow-hidden">
-          <div class="relative overflow-hidden aspect-square">
-            <img src="Assets/images/article-1.jpg" alt="Boris Djimadja"
-              class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-              onerror="this.parentElement.style.background='#1A2E42'" />
-            <div class="absolute top-3 left-3 bg-gold text-white text-xs font-semibold px-3 py-1 rounded-full">
-              20 Oct 2021
-            </div>
-          </div>
-          <div class="p-6">
-            <h3
-              class="font-display font-semibold text-navy text-lg leading-tight mb-3 group-hover:text-gold transition-colors">
-              Entretien avec Boris Djimadja, président du GREC
-            </h3>
-            <p class="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-3">
-              Le GREC est né pour servir de pont entre les entrepreneurs locaux et ceux de la diaspora. Depuis mars
-              2021, ils ont décidé de se mettre ensemble.
-            </p>
-            <a href="pages/actualites.html"
-              class="text-gold text-sm font-medium hover:underline inline-flex items-center gap-1">
-              Lire l'article <span>→</span>
-            </a>
-          </div>
-        </article>
-
-
-        <article class="card reveal group overflow-hidden">
-          <div class="relative overflow-hidden aspect-square">
-            <img src="Assets/images/action-sociale.jpg" alt="Action sociale Athiémé"
-              class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-              onerror="this.parentElement.style.background='#1A2E42'" />
-            <div class="absolute top-3 left-3 bg-gold text-white text-xs font-semibold px-3 py-1 rounded-full">
-              29 Juil 2021
-            </div>
-          </div>
-          <div class="p-6">
-            <h3
-              class="font-display font-semibold text-navy text-lg leading-tight mb-3 group-hover:text-gold transition-colors">
-              Aide aux démunis et orphelins à Athiémé avec le HCBE-Monde
-            </h3>
-            <p class="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-3">
-              Les pensionnaires du CAPE « La maison de joie » ont reçu la visite des membres du GREC et du HCBE-MONDE.
-            </p>
-            <a href="pages/actualites.html"
-              class="text-gold text-sm font-medium hover:underline inline-flex items-center gap-1">
-              Lire l'article <span>→</span>
-            </a>
-          </div>
-        </article>
-
-        <article class="card reveal group overflow-hidden flex flex-col justify-between p-8 text-white" style="background:#0D1B2A">
-          <div>
-            <div class="section-label mb-4">Vie du réseau</div>
-            <h3 class="font-display font-semibold text-xl leading-tight mb-3">Retrouvez toute l'actualité du GREC</h3>
-            <p class="text-white/70 text-sm leading-relaxed">
-              Entretiens, événements, partenariats et actions sociales : suivez la vie du réseau.
-            </p>
-          </div>
-          <a href="pages/actualites.html" class="btn btn-gold text-sm mt-6 self-start">
-            Tous les articles <span>→</span>
-          </a>
-        </article>
-
-      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6" id="articles-grid"></div>
 
       <div class="text-center mt-10 md:hidden">
         <a href="pages/actualites.html" class="btn btn-outline-gold">Tous les articles ?</a>
@@ -969,6 +877,7 @@
 
   <script src="js/firebase-config.js?v=3"></script>
   <script src="js/utils.js?v=3"></script>
+  <script src="js/articles-data.js?v=3"></script>
 
   <script>
 
@@ -1055,47 +964,79 @@
     });
 
 
+    // -- Articles récents : source unique js/articles-data.js (+ articles publiés depuis l'admin) --
+    function homeArticleCard(a) {
+      const photo = a.img
+        ? `<img src="${escapeHtml(a.img)}" alt="${escapeHtml(a.titre)}" loading="lazy"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+             style="object-position:${escapeHtml(a.imgPos || 'center top')}"
+             onerror="this.remove()" />`
+        : '';
+      return `
+        <article class="card reveal group overflow-hidden flex flex-col">
+          <a href="${escapeHtml(a.href)}" class="relative block overflow-hidden aspect-square bg-navy-mid" aria-label="Lire : ${escapeHtml(a.titre)}">
+            ${photo}
+            ${a.dateLabel ? `<div class="absolute top-3 left-3 bg-gold text-white text-xs font-semibold px-3 py-1 rounded-full">${escapeHtml(a.dateLabel)}</div>` : ''}
+          </a>
+          <div class="p-6 flex flex-col flex-grow">
+            <h3 class="font-display font-semibold text-navy text-lg leading-tight mb-3 group-hover:text-gold transition-colors">
+              <a href="${escapeHtml(a.href)}">${escapeHtml(a.titre)}</a>
+            </h3>
+            <p class="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-3 flex-grow">${escapeHtml(a.resume)}</p>
+            <a href="${escapeHtml(a.href)}" class="text-gold text-sm font-medium hover:underline inline-flex items-center gap-1">
+              Lire l'article <span>→</span>
+            </a>
+          </div>
+        </article>`;
+    }
+
+    function renderHomeArticles(list) {
+      const grid = document.getElementById('articles-grid');
+      if (!grid) return;
+      grid.innerHTML = list.slice(0, 4).map(homeArticleCard).join('');
+      initScrollReveal();
+    }
+
+    function repriseArticles() {
+      return (window.GREC_ARTICLES || []).map((a) => ({
+        titre: a.titreCourt || a.titre,
+        resume: a.resume,
+        dateLabel: `${parseInt(a.jour, 10)} ${({ Janvier: 'Janv', 'Février': 'Févr', Avril: 'Avr', Juillet: 'Juil', Septembre: 'Sept', Octobre: 'Oct', Novembre: 'Nov', 'Décembre': 'Déc' })[a.mois] || a.mois} ${a.annee}`,
+        img: 'Assets/images/' + a.image,
+        imgPos: a.imagePosition,
+        href: 'pages/actualites.html?article=' + a.id
+      }));
+    }
+
     async function loadActualites() {
+      const base = repriseArticles();
+      renderHomeArticles(base);
       try {
         const snap = await db.collection(COLLECTIONS.ACTUALITES)
           .where('publie', '==', true)
           .orderBy('publishedAt', 'desc')
           .limit(4)
           .get();
+        if (snap.empty) return;
 
-        if (snap.empty) return; // garder les articles statiques
-
-        const grid = document.getElementById('articles-grid');
-        grid.innerHTML = '';
-
-        snap.docs.forEach(doc => {
-          const a = doc.data();
-          grid.innerHTML += `
-        <article class="card reveal group overflow-hidden">
-          <div class="relative overflow-hidden aspect-square">
-            <img src="${escapeHtml(safeImageUrl(a.imageURL))}"
-                 alt="${escapeHtml(a.titre)}"
-                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                 onerror="this.parentElement.style.background='#1A2E42'"/>
-            <div class="absolute top-3 left-3 bg-gold text-white text-xs font-semibold px-3 py-1 rounded-full">
-              ${formatDateFR(a.publishedAt)}
-            </div>
-          </div>
-          <div class="p-6">
-            <h3 class="font-display font-semibold text-navy text-lg leading-tight mb-3 group-hover:text-gold transition-colors">
-              ${escapeHtml(a.titre)}
-            </h3>
-            <p class="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-3">${escapeHtml(a.resume || '')}</p>
-            <a href="pages/actualites.html" class="text-gold text-sm font-medium hover:underline inline-flex items-center gap-1">
-              Lire l'article <span>→</span>
-            </a>
-          </div>
-        </article>`;
+        const known = new Set(base.map((a) => a.titre.trim().toLowerCase()));
+        const fromDb = [];
+        snap.docs.forEach((doc) => {
+          const a = doc.data() || {};
+          const titre = String(a.titre || '').trim();
+          if (!titre || known.has(titre.toLowerCase())) return;
+          fromDb.push({
+            titre,
+            resume: String(a.resume || a.description || '').trim(),
+            dateLabel: formatDateFR(a.publishedAt),
+            img: safeImageUrl(a.imageURL || a.image),
+            imgPos: 'center top',
+            href: 'pages/actualites.html'
+          });
         });
-
-        initScrollReveal();
+        if (fromDb.length) renderHomeArticles(fromDb.concat(base));
       } catch (e) {
-        console.log('Firestore non configuré, articles statiques affichés.');
+        console.log('Firestore indisponible, articles repris affichés.');
       }
     }
 
