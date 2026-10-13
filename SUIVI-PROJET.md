@@ -265,3 +265,5 @@ Bannières des pages Qui sommes-nous, Actualités, Galerie et Nos partenaires : 
 - **Globales Firebase** : `db`, `auth`, `COLLECTIONS` sont des `const` : tester `typeof db !== 'undefined'`, jamais `window.db`.
 - **Content-Security-Policy** (`firebase.json`) : toute nouvelle origine externe (script, police, API) doit y être ajoutée, sinon elle est bloquée.
 - **Cartes de membres de `membres.html`** : 12 fiches écrites en dur (Kofi Adjovi, Aïssatou Kéïta…) à vérifier : vrais membres ou exemples ?
+
+- **Galerie masquée (13 octobre 2026, demande du client)** : liens de menu et de pied de page, section « Galerie photos » de l'accueil, entrée du sitemap : mis en commentaire HTML (rechercher « Galerie masquée »). `pages/galerie.html` redirige vers l'accueil (lignes `GALERIE-MASQUEE` du `<head>` à supprimer) et reste interdite dans `robots.txt`. La gestion de la galerie reste disponible dans le dashboard admin.
