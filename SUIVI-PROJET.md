@@ -11,7 +11,7 @@ Dernière mise à jour : 9 octobre 2026.
 
 | | |
 |---|---|
-| **Site en ligne** | https://grec-group.web.app |
+| **Site en ligne** | https://grec.group (hébergement OVH, publié par FTP) |
 | **Dépôt GitHub (à utiliser)** | https://github.com/loukmansavplus/Grec-Group (branche `main`) |
 | **Ancien dépôt** | `darkk-kira/grec-site` : plus utilisé |
 | **Projet Firebase** | `grec-group-f43b0` (Auth e-mail/mot de passe, Firestore europe-west1, Hosting) |
@@ -279,3 +279,5 @@ Bannières des pages Qui sommes-nous, Actualités, Galerie et Nos partenaires : 
 - **Optimisation des coûts (28 octobre 2026)** : Actualités lit 24 articles au lieu de 60 (événements 12, messagerie 100 membres) ; les listes d'articles sont gardées 10 minutes en cache de session (`cachedFetch` dans `js/utils.js`) ; les images Cloudinary sont servies en `f_auto,q_auto` (≈ 25 % plus légères) ; le preset `grec-upload` limite les images à 1200 px. **Attention** : modifier un preset Cloudinary par l'API efface les réglages non renvoyés : toujours renvoyer `unsigned`, `folder`, `allowed_formats` et `transformation`. Surveiller : console Firebase (Utilisation et facturation, offre Spark) et tableau de bord Cloudinary.
 
 - **Administrateur créé (28 octobre 2026)** : compte `admin@grec.group` (Authentication + document `admins/{uid}`), mot de passe provisoire à changer à la première connexion (lien « Mot de passe oublié » de la page de connexion, ce qui suppose que la boîte `admin@grec.group` existe chez OVH : la messagerie de `grec.group` est chez OVH, `mx3/mx4.mail.ovh.net`). Anciens envois d'e-mails (site PHP) : fonction `mail()`, expéditeur « grec », réponse `noreply@grec.group` ; l'ancien site envoyait le nouveau mot de passe en clair, ce que le nouveau site ne fait plus.
+
+- **BASCULE EFFECTUÉE (28 octobre 2026)** : le nouveau site est à la racine de https://grec.group (hébergement OVH). L'ancien site PHP a été **déplacé sans suppression** (renommage, 39 éléments, contrôlé avant/après) dans le dossier `grec-old/` du serveur, protégé par un `.htaccess` « accès interdit » (l'ancien `.htaccess` de la racine est conservé sous `grec-old/.htaccess.ancien-racine`). Pour **revenir en arrière** : déplacer le contenu de `grec-old/` vers la racine (et remettre les fichiers du nouveau site dans `grec-site/`), `python deploy/ftp_deploy.py` republie le nouveau site à la racine (variable `FTPDIR` pour viser un sous-dossier de test). Sauvegarde locale partielle de l'ancien site : `Documents\SAUVEGARDE-OVH-ancien-site-2026-10-28` (téléchargement interrompu, ~800 fichiers) ; la copie complète est sur le serveur dans `grec-old/`. À faire : changer le mot de passe FTP et celui de `admin@grec.group`, supprimer les clés de comptes de service, régénérer les clés Cloudinary, restreindre la clé API Firebase au domaine `grec.group`.

@@ -1,4 +1,4 @@
-"""Publication du site sur OVH par FTP (dossier distant : grec-site).
+"""Publication du site sur OVH par FTP (racine du domaine ; variable FTPDIR pour un sous-dossier de test).
 
 Usage (PowerShell) :
     $env:FTPU = "identifiant-ftp"; $env:FTPPW = "mot-de-passe"; python deploy/ftp_deploy.py
@@ -14,7 +14,7 @@ import ftplib, os, sys
 HOST = 'ftpcloud.cluster024.hosting.ovh.net'
 USER = os.environ['FTPU']      # identifiant FTP OVH
 PWD = os.environ['FTPPW']      # mot de passe FTP OVH (jamais écrit dans le dépôt)
-REMOTE_DIR = 'grec-site'            # SEUL dossier touché sur le serveur
+REMOTE_DIR = os.environ.get('FTPDIR', '')   # dossier distant : vide = racine du domaine (site en production)
 SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))   # racine du dépôt
 
 TOP_FILES = ['index.html', '404.html', 'robots.txt', 'sitemap.xml']
@@ -52,7 +52,8 @@ def ensure_dirs(ftp, rel):
 ftp = ftplib.FTP(HOST, timeout=60)
 ftp.login(USER, PWD)
 ftp.set_pasv(True)
-ftp.cwd(REMOTE_DIR)
+if REMOTE_DIR:
+    ftp.cwd(REMOTE_DIR)
 print('Dossier distant :', ftp.pwd())
 
 items = collect()
@@ -73,7 +74,8 @@ for full, rel in items:
             ftp = ftplib.FTP(HOST, timeout=60)
             ftp.login(USER, PWD)
             ftp.set_pasv(True)
-            ftp.cwd(REMOTE_DIR)
+            if REMOTE_DIR:
+                ftp.cwd(REMOTE_DIR)
 print('Envoyés :', ok, '| erreurs :', len(errors))
 for rel, e in errors[:10]:
     print('  ERREUR', rel, e)

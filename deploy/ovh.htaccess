@@ -4,12 +4,17 @@
 #  dans le dossier du site. Ne pas mettre a la racine d'un
 #  autre site sans en verifier l'impact.
 # ============================================================
+# Redirection vers HTTPS (reprise de l'ancien .htaccess de la racine)
+RewriteEngine On
+RewriteCond %{ENV:HTTPS} !on
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 AddDefaultCharset UTF-8
 Options -Indexes
 DirectoryIndex index.html
 
-# 404 : a decommenter quand le site est a la racine du domaine
-# ErrorDocument 404 /404.html
+# Page 404 (le site est a la racine du domaine)
+ErrorDocument 404 /404.html
 
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
