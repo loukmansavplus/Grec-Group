@@ -16,6 +16,12 @@ const firebaseConfig = {
 // Initialisation Firebase
 firebase.initializeApp(firebaseConfig);
 
+// ── Dossier de base du site (racine du domaine OU sous-dossier comme /grec-site/) ──
+const SITE_ROOT = (function () {
+  try { return new URL('../', document.currentScript.src).pathname; } catch (e) { return '/'; }
+})();
+
+
 // Services exportés (utilisés dans tout le site)
 const auth      = firebase.auth();
 const db        = firebase.firestore();

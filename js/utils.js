@@ -11,7 +11,9 @@ function escapeHtml(value) {
 
 // URL d'image sûre : uniquement http(s) ou chemin relatif
 function safeImageUrl(url) {
-  const value = String(url || '').trim();
+  let value = String(url || '').trim();
+  // Images du site enregistrées en base (/Assets/images/...) : résolues depuis la base du site
+  if (/^\/?Assets\//i.test(value) && typeof SITE_ROOT === 'string') value = SITE_ROOT + value.replace(/^\//, '');
   return /^(https?:\/\/|\.{0,2}\/|[\w-]+\/)/i.test(value) && !/^\s*javascript:/i.test(value) ? value : '';
 }
 
