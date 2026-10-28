@@ -15,7 +15,7 @@ Dernière mise à jour : 9 octobre 2026.
 | **Dépôt GitHub (à utiliser)** | https://github.com/loukmansavplus/Grec-Group (branche `main`) |
 | **Ancien dépôt** | `darkk-kira/grec-site` : plus utilisé |
 | **Projet Firebase** | `grec-group-f43b0` (Auth e-mail/mot de passe, Firestore europe-west1, Hosting) |
-| **Images envoyées depuis le site** | Cloudinary, cloud name `onozly6o`, preset non signé `grec-upload` |
+| **Images envoyées depuis le site** | Cloudinary, cloud name `ezloqmpj`, preset non signé `grec-upload` |
 | **Déploiement** | Automatique à chaque `git push` sur `main` (GitHub Actions) |
 | **Site d'origine repris** | https://grec.group (PHP), dont on reproduit le contenu |
 
