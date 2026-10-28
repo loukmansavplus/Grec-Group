@@ -5,12 +5,12 @@
 // ============================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBwyFj7anjSxzbvhWYRJmSZ5lBK0MKiBmQ",
-  authDomain: "grec-group.firebaseapp.com",
-  projectId: "grec-group",
-  storageBucket: "grec-group.firebasestorage.app",
-  messagingSenderId: "187575104452",
-  appId: "1:187575104452:web:cfa9d2dc1484ff1e79ea91"
+  apiKey: "AIzaSyDYtG45C8gPNiaJZBHzQ6ViY_iZiCffngs",
+  authDomain: "grec-group-f43b0.firebaseapp.com",
+  projectId: "grec-group-f43b0",
+  storageBucket: "grec-group-f43b0.firebasestorage.app",
+  messagingSenderId: "977516136401",
+  appId: "1:977516136401:web:36396a64277be4d86702f0"
 };
 
 // Initialisation Firebase

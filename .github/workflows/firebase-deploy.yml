@@ -26,7 +26,7 @@ jobs:
       - name: Déploiement
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
-        run: npx --yes firebase-tools@latest deploy --only hosting,firestore --project grec-group --non-interactive
+        run: npx --yes firebase-tools@latest deploy --only hosting,firestore --project grec-group-f43b0 --non-interactive
 
       - name: Nettoyage
         if: always()

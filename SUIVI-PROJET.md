@@ -14,7 +14,7 @@ Dernière mise à jour : 9 octobre 2026.
 | **Site en ligne** | https://grec-group.web.app |
 | **Dépôt GitHub (à utiliser)** | https://github.com/loukmansavplus/Grec-Group (branche `main`) |
 | **Ancien dépôt** | `darkk-kira/grec-site` : plus utilisé |
-| **Projet Firebase** | `grec-group` (Auth e-mail/mot de passe, Firestore europe-west1, Hosting) |
+| **Projet Firebase** | `grec-group-f43b0` (Auth e-mail/mot de passe, Firestore europe-west1, Hosting) |
 | **Images envoyées depuis le site** | Cloudinary, cloud name `onozly6o`, preset non signé `grec-upload` |
 | **Déploiement** | Automatique à chaque `git push` sur `main` (GitHub Actions) |
 | **Site d'origine repris** | https://grec.group (PHP), dont on reproduit le contenu |
@@ -61,7 +61,7 @@ Inutile pour publier (c'est automatique). Utile pour déployer à la main ou tes
 ```bash
 npm install -g firebase-tools
 firebase login
-firebase deploy --only firestore:rules,firestore:indexes,hosting --project grec-group
+firebase deploy --only firestore:rules,firestore:indexes,hosting --project grec-group-f43b0
 ```
 
 ---
@@ -127,10 +127,10 @@ Les règles sont dans [firestore.rules](firestore.rules). **Un administrateur n'
 ## 4. Déploiement automatique
 
 Fichier : [.github/workflows/firebase-deploy.yml](.github/workflows/firebase-deploy.yml). À chaque push sur `main`, il exécute :
-`firebase deploy --only hosting,firestore --project grec-group`
+`firebase deploy --only hosting,firestore --project grec-group-f43b0`
 ce qui publie **le site, les règles et les index Firestore**.
 
-- Il utilise le secret GitHub **`FIREBASE_SERVICE_ACCOUNT`** (clé JSON du compte `firebase-adminsdk-fbsvc@grec-group.iam.gserviceaccount.com`).
+- Il utilise le secret GitHub **`FIREBASE_SERVICE_ACCOUNT`** (clé JSON d'un compte de service du projet `grec-group-f43b0`).
   Dépôt, Settings, Secrets and variables, Actions.
 - Rôles IAM donnés à ce compte : Administrateur Firebase, Administrateur d'index Cloud Datastore, Consommateur Service Usage.
 - Si le déploiement échoue sur une autorisation, le message de l'onglet Actions dit quel rôle ajouter (console Google Cloud, IAM).
@@ -267,3 +267,5 @@ Bannières des pages Qui sommes-nous, Actualités, Galerie et Nos partenaires : 
 - **Cartes de membres de `membres.html`** : 12 fiches écrites en dur (Kofi Adjovi, Aïssatou Kéïta…) à vérifier : vrais membres ou exemples ?
 
 - **Galerie masquée (13 octobre 2026, demande du client)** : liens de menu et de pied de page, section « Galerie photos » de l'accueil, entrée du sitemap : mis en commentaire HTML (rechercher « Galerie masquée »). `pages/galerie.html` redirige vers l'accueil (lignes `GALERIE-MASQUEE` du `<head>` à supprimer) et reste interdite dans `robots.txt`. La gestion de la galerie reste disponible dans le dashboard admin.
+
+- **Changement de projet Firebase (28 octobre 2026)** : le site utilise désormais le projet `grec-group-f43b0` (compte de l'entreprise). À faire côté console : activer Authentication (e-mail/mot de passe), créer Firestore (europe-west1), remplacer le secret GitHub `FIREBASE_SERVICE_ACCOUNT`, recréer le premier administrateur (`ADMIN-SETUP.md`), réimporter les articles depuis l'admin, autoriser le domaine du site dans Authentication et restreindre la clé API. L'ancien projet `grec-group` n'est plus utilisé. Adresse Hosting du nouveau projet : `grec-group-f43b0.web.app` (les balises canonical/Open Graph/sitemap pointent encore vers l'ancienne adresse : à mettre à jour avec le domaine définitif).
