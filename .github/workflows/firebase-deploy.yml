@@ -1,9 +1,11 @@
 name: Déploiement Firebase
 
-# À chaque push sur main : publie le site, les règles et les index Firestore.
+# (Désactivé) À chaque push sur main : publiait le site, les règles et les index Firestore.
+# Déploiement automatique DÉSACTIVÉ (28 octobre 2026) : le site est publié à la main par FTP chez OVH.
+# Pour le réactiver, remettre le bloc « push » ci-dessous (et renseigner le secret FIREBASE_SERVICE_ACCOUNT du projet).
+#   push:
+#     branches: [main]
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
