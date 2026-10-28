@@ -866,7 +866,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
   <script src="js/firebase-config.js?v=5"></script>
-  <script src="js/utils.js?v=4"></script>
+  <script src="js/utils.js?v=5"></script>
   <script src="js/articles-data.js?v=3"></script>
 
   <script>
@@ -1002,11 +1002,12 @@
       // Articles de la base (gérés depuis l'admin) ; sinon articles repris de l'ancien site
       const base = repriseArticles();
       try {
+        const fromDb = await cachedFetch('accueil-articles', 10 * 60 * 1000, async () => {
         const snap = await Promise.race([
           db.collection(COLLECTIONS.ACTUALITES).where('publie', '==', true).orderBy('publishedAt', 'desc').limit(4).get(),
           new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
         ]);
-        const fromDb = snap.docs.map((doc) => {
+        return snap.docs.map((doc) => {
           const a = doc.data() || {};
           return {
             titre: String(a.titreCourt || a.titre || '').trim(),
@@ -1017,6 +1018,7 @@
             href: 'pages/actualites.html?article=' + encodeURIComponent(doc.id)
           };
         }).filter((a) => a.titre);
+        });
         renderHomeArticles(fromDb.length ? fromDb : base);
       } catch (e) {
         console.log('Firestore indisponible, articles repris affichés.');

@@ -1041,7 +1041,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="../js/firebase-config.js?v=5"></script>
-  <script src="../js/utils.js?v=4"></script>
+  <script src="../js/utils.js?v=5"></script>
   <script src="../js/articles-data.js?v=3"></script>
   <script src="../js/contributions.js?v=4"></script>
 
@@ -1079,8 +1079,12 @@
     // -- Articles publiés dans la base (gérés depuis l'admin) --
     // Si la base est vide ou inaccessible, on affiche les articles repris de l'ancien site.
     async function fetchPublishedArticles() {
+      return cachedFetch('actualites-liste', 10 * 60 * 1000, loadPublishedArticles);
+    }
+
+    async function loadPublishedArticles() {
       const snap = await db.collection(COLLECTIONS.ACTUALITES)
-        .where('publie', '==', true).orderBy('publishedAt', 'desc').limit(60).get();
+        .where('publie', '==', true).orderBy('publishedAt', 'desc').limit(24).get();
       const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
       return snap.docs.map((doc) => {
         const d = doc.data() || {};
@@ -1127,7 +1131,7 @@
     async function loadUpcomingEvents() {
       try {
         const snap = await db.collection(COLLECTIONS.EVENEMENTS)
-          .where('publie', '==', true).orderBy('date', 'asc').limit(24).get();
+          .where('publie', '==', true).orderBy('date', 'asc').limit(12).get();
         const today = new Date().toISOString().slice(0, 10);
         const events = snap.docs.map((doc) => doc.data() || {})
           .filter((e) => e.titre && e.date && String(e.date) >= today)

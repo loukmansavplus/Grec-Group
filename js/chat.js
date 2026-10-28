@@ -85,7 +85,7 @@ async function chatLoadMembers() {
   const list = document.getElementById('chat-members-list');
   list.innerHTML = '<p class="chat-muted">Chargement des membres...</p>';
 
-  const snap = await db.collection(COLLECTIONS.MEMBRES).limit(300).get();
+  const snap = await db.collection(COLLECTIONS.MEMBRES).limit(100).get();
   if (snap.empty) {
     list.innerHTML = '<p class="chat-muted">Aucun membre disponible.</p>';
     return;

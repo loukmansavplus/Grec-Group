@@ -10,11 +10,29 @@ function escapeHtml(value) {
 }
 
 // URL d'image sûre : uniquement http(s) ou chemin relatif
+// ── Cache de session : évite de relire la base à chaque page (économise les lectures Firestore) ──
+async function cachedFetch(key, ttlMs, fetcher) {
+  const k = 'grec:' + key;
+  try {
+    const raw = sessionStorage.getItem(k);
+    if (raw) { const o = JSON.parse(raw); if (Date.now() - o.t < ttlMs) return o.v; }
+  } catch (e) { /* stockage indisponible : on lit la base */ }
+  const v = await fetcher();
+  try { sessionStorage.setItem(k, JSON.stringify({ t: Date.now(), v })); } catch (e) { /* ignoré */ }
+  return v;
+}
+
+// ── Images Cloudinary : format et qualité automatiques (images plus légères = moins de trafic) ──
+function optimizeCloudinaryUrl(url) {
+  return String(url).replace(/(res\.cloudinary\.com\/[^/]+\/image\/upload\/)(?!(?:[a-z]{1,3}_[^/]*\/))/i, '$1f_auto,q_auto/');
+}
+
 function safeImageUrl(url) {
   let value = String(url || '').trim();
   // Images du site enregistrées en base (/Assets/images/...) : résolues depuis la base du site
   if (/^\/?Assets\//i.test(value) && typeof SITE_ROOT === 'string') value = SITE_ROOT + value.replace(/^\//, '');
-  return /^(https?:\/\/|\.{0,2}\/|[\w-]+\/)/i.test(value) && !/^\s*javascript:/i.test(value) ? value : '';
+  if (!(/^(https?:\/\/|\.{0,2}\/|[\w-]+\/)/i.test(value) && !/^\s*javascript:/i.test(value))) return '';
+  return /res\.cloudinary\.com/i.test(value) ? optimizeCloudinaryUrl(value) : value;
 }
 
 // ── Toast Notifications ──────────────────────────────────────
