@@ -200,7 +200,7 @@ Si un chargement échoue, un **bandeau rouge** en haut de la page indique la col
 - [ ] Formulaires de contact et de newsletter (les messages arrivent dans l'admin).
 
 ### B. Contenu à confirmer avec le client
-- [ ] **Adresses e-mail de contact** : le site affiche `contact@grec.com` et `p.axelle@grec.group` (deux domaines). Quelle est la bonne ?
+- [x] Adresses e-mail de contact : `contact@grec.com` était une erreur (ce domaine n'existe pas), remplacée par les adresses `@grec.group` de l'ancien site (pied de page : 4 adresses ; Boris et partenariats : `d.boris@grec.group`).
 - [ ] **Date de l'article « Romain Da Costa… Saype »** : 6 février 2021 sur l'ancien site, mais le texte parle de mars.
 - [ ] Vérifier les autres pages (membres, galerie, partenaires, « Qui sommes-nous ») : exemples fictifs ou vrai contenu ?
 - [ ] Photos trop petites à remplacer : Brice Zohoun (225 px), Jocelyne Duval (188 px), logo blanc (130 px).
