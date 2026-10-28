@@ -1,5 +1,7 @@
 # GREC Group — Suivi du projet
 
+> **État à jour, procédures et reste à faire : voir [PASSATION-IA.md](PASSATION-IA.md).** Ce fichier est le journal historique ; certaines sections anciennes (adresses `grec-group.web.app`, listes « à tester ») sont dépassées.
+
 Document de passation : ce qui est en place, comment reprendre le travail sur un autre poste, et ce qu'il reste à faire.
 Dernière mise à jour : 9 octobre 2026.
 
