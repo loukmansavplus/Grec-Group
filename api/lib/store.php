@@ -7,7 +7,7 @@ function index_config($coll)
 {
     $map = array(
         'membres'       => array('k1' => 'email', 'k1lower' => true, 'k2' => 'statut', 'ord' => 'createdAt'),
-        'annuaire'      => array('ord' => 'createdAt'),
+        'annuaire'      => array('k1' => 'pays', 'k2' => 'secteur', 'ord' => 'createdAt'),
         'admins'        => array('k1' => 'email', 'k1lower' => true),
         'actualites'    => array('k1' => 'publie', 'k2' => 'authorUid', 'ord' => 'publishedAt'),
         'evenements'    => array('k1' => 'publie', 'k2' => 'authorUid', 'ord' => 'date'),

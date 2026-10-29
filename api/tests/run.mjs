@@ -89,6 +89,9 @@ const ts = (ms) => ({ __ts: ms });
   v = await mk();
   r = await v.query('annuaire'); check('lire l\'annuaire public (liste)', allowed(r) && r.json.docs.length >= 1);
   r = await v.get('annuaire/legacy-m1'); check('lire une fiche de l\'annuaire', allowed(r) && r.json.exists);
+  { const res = await fetch(BASE + '/api/members?page=1'); const j = await res.json(); check('annuaire paginé côté serveur (8 par page, total et pages)', res.status === 200 && j.perPage === 8 && j.items.length <= 8 && j.total >= 1 && j.pages >= 1 && Array.isArray(j.pays)); check('annuaire paginé : aucun e-mail ni téléphone', !JSON.stringify(j.items).match(/"(email|telephone)"/));
+    const res2 = await fetch(BASE + '/api/members?pays=Pays-inexistant'); const j2 = await res2.json(); check('annuaire paginé : filtre pays sans résultat', j2.total === 0 && j2.items.length === 0);
+    const res3 = await fetch(BASE + '/api/members?q=' + encodeURIComponent('100%_|')); check('annuaire paginé : recherche avec caractères spéciaux sans erreur', res3.status === 200); }
   r = await v.query('membres'); check('lire la liste des membres (e-mails, téléphones)', denied(r));
   r = await v.get('membres/legacy-m1'); check('lire le profil complet d\'un membre', denied(r));
   r = await v.query('actualites', [['publie', '==', true]], [['publishedAt', 'desc']], 2); check('articles publiés, du plus récent, limités à 2', allowed(r) && r.json.docs.length === 2 && r.json.docs[0].id === 'a3' && r.json.docs[1].id === 'a2', JSON.stringify(r.json.docs && r.json.docs.map(d => d.id)));

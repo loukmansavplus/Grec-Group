@@ -100,6 +100,33 @@ try {
         exit;
     }
 
+    // Annuaire public paginé côté serveur (comme l'ancien site : 8 fiches par page, filtres pays / activité, recherche).
+    if ($route === 'members' && $method === 'GET') {
+        $per = 8;
+        $page = max(1, (int) (isset($_GET['page']) ? $_GET['page'] : 1));
+        $where = " WHERE coll = 'annuaire'";
+        $params = array();
+        $pays = isset($_GET['pays']) ? trim((string) $_GET['pays']) : '';
+        $sect = isset($_GET['secteur']) ? trim((string) $_GET['secteur']) : '';
+        $qs = isset($_GET['q']) ? trim((string) $_GET['q']) : '';
+        if ($pays !== '') { $where .= ' AND k1 = ?'; $params[] = key_norm($pays); }
+        if ($sect !== '') { $where .= ' AND k2 = ?'; $params[] = key_norm($sect); }
+        if ($qs !== '') {
+            $where .= " AND data LIKE ? ESCAPE '|'";
+            $enc = trim((string) json_encode(mb_substr($qs, 0, 60), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), '"'); // même forme que dans le JSON stocké
+            $params[] = '%' . str_replace(array('|', '%', '_'), array('||', '|%', '|_'), $enc) . '%';
+        }
+        $total = (int) q('SELECT COUNT(*) AS n FROM app_doc' . $where, $params)->fetch()['n'];
+        $pages = max(1, (int) ceil($total / $per));
+        if ($page > $pages) $page = $pages;
+        $rows = q('SELECT id, data FROM app_doc' . $where . ' ORDER BY ord DESC, id ASC LIMIT ' . $per . ' OFFSET ' . (($page - 1) * $per), $params)->fetchAll();
+        $items = array();
+        foreach ($rows as $r) $items[] = array('id' => $r['id'], 'data' => json_decode($r['data'], true));
+        $paysList = array();
+        foreach (q("SELECT DISTINCT k1 FROM app_doc WHERE coll = 'annuaire' AND k1 IS NOT NULL AND k1 <> '' ORDER BY k1")->fetchAll() as $r) $paysList[] = $r['k1'];
+        json_out(200, array('total' => $total, 'page' => $page, 'pages' => $pages, 'perPage' => $per, 'items' => $items, 'pays' => $paysList));
+    }
+
     if ($method !== 'POST') fail(405, 'method-not-allowed', 'POST attendu');
     $ct = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
     if (stripos($ct, 'application/json') === false) fail(415, 'unsupported-media-type', 'JSON attendu');
