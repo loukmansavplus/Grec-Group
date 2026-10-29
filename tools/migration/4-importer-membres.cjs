@@ -60,7 +60,7 @@ const clean = (s) => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
       nom: clean(m.nom_prenom), prenom: '', nomFamille: '', email, telephone: clean(m.phone), pays: clean(m.pays),
       secteur: clean(m.activite), bio: String(m.presentation || '').trim(), poste: '', ville: '',
       statut: m.statut === '1' ? 'actif' : 'en_attente', codeEthique: true, role: 'membre',
-      publicProfileEnabled: false, showPhoto: true, showBio: true, showLocation: true,
+      publicProfileEnabled: true, showPhoto: true, showBio: true, showLocation: true,
       legacyId: Number(m.id_membre), legacySource: 'ancien-site-php', createdAt: created, updatedAt: FV.serverTimestamp(),
     };
     if (photos[m.id_membre]) doc.photoURL = photos[m.id_membre];

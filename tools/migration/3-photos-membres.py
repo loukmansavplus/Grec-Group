@@ -28,12 +28,16 @@ for l in lines:
 print('Fichiers dans grec-old/images :', len(remote))
 
 result, missing, bad = {}, [], []
+if os.path.exists(BASE + 'photos.json'):          # photos déjà envoyées lors d'une migration précédente : on les garde, on ne les renvoie pas
+    result = json.load(open(BASE + 'photos.json', encoding='utf-8'))
 CLOUD = 'ezloqmpj'
 PRESET = 'grec-upload'
 for m in with_photo:
     name = m['photo'].strip()
     if name not in remote:
         missing.append(m['id_membre'])
+        continue
+    if m['id_membre'] in result:
         continue
     local = PHOTOS_DIR + name
     if not os.path.exists(local):
