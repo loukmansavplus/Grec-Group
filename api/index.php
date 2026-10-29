@@ -9,6 +9,7 @@ ini_set('log_errors', '1');
 require __DIR__ . '/lib/util.php';
 require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/store.php';
+require __DIR__ . '/lib/legacy.php';
 require __DIR__ . '/lib/policy.php';
 require __DIR__ . '/lib/mail.php';
 require __DIR__ . '/lib/auth.php';
@@ -68,6 +69,7 @@ function apply_set($coll, $id, $data, $merge, $uid)
     }
     if (!can_write($op, $coll, $id, $old, $new, $uid)) fail(403, 'permission-denied', 'Missing or insufficient permissions.');
     doc_put($coll, $id, $new);
+    if ($coll === 'membres') legacy_mirror_member($id, $new);
     return $id;
 }
 
@@ -77,6 +79,7 @@ function apply_delete($coll, $id, $uid)
     if ($old === null) return;
     if (!can_write('delete', $coll, $id, $old, null, $uid)) fail(403, 'permission-denied', 'Missing or insufficient permissions.');
     doc_delete($coll, $id);
+    if ($coll === 'membres') legacy_delete_member($old);
 }
 
 try {
