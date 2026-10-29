@@ -72,6 +72,18 @@ Fichiers hérités et **non utilisés en production** : `firebase.json` (ancien 
 - **Bascule OVH effectuée** : l'ancien site PHP a été **déplacé sans suppression** (renommage, 39 éléments, inventaire contrôlé avant/après) dans **`grec-old/`** sur le serveur, protégé par un `.htaccess` « accès interdit » (l'ancien `.htaccess` de la racine est conservé sous `grec-old/.htaccess.ancien-racine`). Le nouveau site est à la racine. HTTPS forcé, `www` OK.
 - Contrôle automatique : `node tools/audit.mjs` → **10 pages × 2 largeurs, aucun problème** (28 octobre 2026).
 
+## 4 bis. Migration de l'ancienne base MySQL (faite le 29 octobre 2026)
+
+**Ancien système** : site PHP + base MySQL OVH `hconsuqgrec` (accès par phpMyAdmin ; la base n'est joignable que depuis l'hébergement OVH). Tables : `g_membre`, `g_news`, `g_admin`, `g_categorie`, `g_pays`, `g_secteur_activite`. Mots de passe = SHA-512 hexadécimal sans sel ; requêtes SQL construites par concaténation (injectables) ; l'ancienne réinitialisation envoyait le mot de passe en clair. Photos dans `images/` du serveur (aujourd'hui `grec-old/images/`).
+
+**Export complet** de la base téléchargé hors dépôt : `Documents\SAUVEGARDE-OVH-ancien-site-2026-10-28ase-de-donnees\hconsuqgrec.sql` (+ `donnees.json`, `photos-membres/`). **Ces fichiers contiennent des données personnelles et des mots de passe chiffrés : ne jamais les mettre sur GitHub.**
+
+**Constat sur `g_membre` (4 038 lignes)** : **26 membres validés** (statut 1, tous inscrits avril–novembre 2021, dont 24 avec e-mail valide) ; **4 012 « en attente » (statut 0)** dont **51 d'octobre–décembre 2021 qui semblent réels** (présentations toutes différentes, 33 pays) et **≈ 3 960 inscriptions automatiques (spam)** de 2022 à 2026 (488 le seul 27/01/2022, domaine `testform.xyz`, même présentation répétée 446 fois, pays par défaut « Zimbabwe »). `g_news` = exactement les 7 articles déjà importés. `g_admin` = 2 comptes (un « Super », un « Rédacteur »). Le client a confirmé ≈ 29-30 vrais membres.
+
+**Fait** : les **24 membres validés avec e-mail valide** ont été importés dans Firebase **avec leur mot de passe actuel** (test préalable concluant : bon mot de passe accepté, mauvais refusé) ; profils créés dans `membres` (uid `legacy-m<id>`, `statut: actif`, `legacyId`, champs `nom`, `telephone`, `pays`, `secteur` = ancienne activité, `bio` = présentation, `createdAt` d'origine) ; **16 photos** envoyées sur Cloudinary (`photoURL`). Profils importés en `publicProfileEnabled: false` (choix prudent, modifiable). Le tableau de bord affiche 26 membres (24 + admin + compte de test). **Aucun membre n'est averti** : prévoir un message leur annonçant le nouveau site et qu'ils se connectent avec leurs anciens identifiants. Scripts : `tools/migration/`.
+
+**Reste à décider avec le client** : (a) importer ou non les **51 inscrits « en attente » de fin 2021** (`--pending2021`, importés avec `statut: en_attente`) ; (b) les **2 anciens administrateurs** (Super / Rédacteur) : les recréer comme administrateurs du nouveau site (même méthode, avec document `admins/{uid}`) ? ; (c) les **2 membres validés sans e-mail valide** (à corriger à la main) ; (d) les **inscrits 2023-2026** (≈ 1 800, quasi tous du spam) : produire une liste « à vérifier » filtrée ; (e) **catégories** des articles (Société, Culture, Économie, selon `g_news.id_categorie`) à reporter dans le champ `categorie` ; (f) aligner les **listes de secteurs (9) et de pays (241)** de l'ancienne base avec le formulaire d'inscription du nouveau site (liste de pays courte, 11 secteurs différents) sans changer le design ; (g) rendre les profils migrés **publics** ou non ; (h) **sécurité** : l'ancienne base MySQL contient toujours les 4 000 lignes de spam et les mots de passe SHA-512 ; la laisser en l'état comme archive, ne pas la réexposer.
+
 ## 5. Procédures
 
 **Publier une modification (aucun déploiement automatique) :**
@@ -120,7 +132,7 @@ Inscription d'un vrai membre + modification du profil avec photo ; contribution 
 ## 7. Décisions d'architecture déjà discutées (ne pas les refaire sans demande)
 - **Rester sur Firebase + Cloudinary** (gratuits à cette échelle, aucune facture sans carte bancaire enregistrée). Un passage à MySQL/PHP/VPS OVH reste possible mais est un **gros chantier** (comptes, règles de sécurité, envoi d'images, messagerie temps réel) : à n'engager que sur exigence du client. Les images pourraient migrer vers l'hébergement OVH (fonction centralisée `uploadFile()` dans `js/utils.js`), les textes rester sur Firebase.
 - **Publication manuelle par FTP** (choix de l'utilisateur). Le déploiement GitHub Actions vers Firebase est désactivé.
-- **Ancien site PHP** conservé dans `grec-old/` (sauvegarde fichiers). Sa **base MySQL** est restée chez OVH (non exportée à ce jour ; l'utilisateur n'est pas inquiet). Les anciens comptes membres **ne sont pas migrés** : les membres doivent se réinscrire.
+- **Ancien site PHP** conservé dans `grec-old/` (sauvegarde fichiers). Sa **base MySQL** est restée chez OVH et a été **exportée en entier** hors dépôt (voir §4 bis). Les **24 membres validés** ont été migrés avec leurs mots de passe (voir §4 bis) ; les autres lignes de l'ancienne base restent dans MySQL et dans l'export.
 - Une sauvegarde locale **partielle** de l'ancien site existe : `Documents\SAUVEGARDE-OVH-ancien-site-2026-10-28` (≈ 800 fichiers, téléchargement interrompu volontairement) ; la copie complète est sur le serveur dans `grec-old/`.
 
 ## 8. Pièges connus (ils ont tous déjà coûté du temps)

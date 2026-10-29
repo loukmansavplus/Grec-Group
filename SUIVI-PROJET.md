@@ -206,7 +206,7 @@ Si un chargement échoue, un **bandeau rouge** en haut de la page indique la col
 - [ ] **Date de l'article « Romain Da Costa… Saype »** : 6 février 2021 sur l'ancien site, mais le texte parle de mars.
 - [ ] Vérifier les autres pages (membres, galerie, partenaires, « Qui sommes-nous ») : exemples fictifs ou vrai contenu ?
 - [ ] Photos trop petites à remplacer : Brice Zohoun (225 px), Jocelyne Duval (188 px), logo blanc (130 px).
-- [ ] Les membres de l'ancien site (grec.group) doivent se réinscrire : leurs comptes ne sont pas repris.
+- [x] Membres de l'ancien site : les 24 membres validés ont été migrés avec leur mot de passe (voir PASSATION-IA.md, §4 bis) ; décisions restantes dans ce même document.
 
 ### C. Sécurité
 - [ ] **Supprimer le fichier JSON de clé du compte de service** de tout ordinateur, et contrôler `API USEFULL`.
