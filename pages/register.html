@@ -1011,7 +1011,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="../js/firebase-config.js?v=5"></script>
-  <script src="../js/utils.js?v=5"></script>
+  <script src="../js/utils.js?v=6"></script>
 
   <script>
     function togglePwd(id) {
@@ -1042,19 +1042,22 @@
       btn.disabled = true;
       btn.innerHTML = '<div class="spin"></div> Création du compte…';
       try {
+        window.GREC_REGISTERING = true; // évite la redirection / le blocage automatiques pendant la création du compte
         const cred = await auth.createUserWithEmailAndPassword(email, pwd);
         await cred.user.updateProfile({ displayName: fullName });
         await db.collection(COLLECTIONS.MEMBRES).doc(cred.user.uid).set({
           nom: fullName, prenom, nomFamille, email, telephone: phone, pays, secteur: sector,
-          statut: 'actif', codeEthique: true, role: ROLES.MEMBRE,
+          statut: 'en_attente', codeEthique: true, role: ROLES.MEMBRE,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         // E-mail de vérification (non bloquant : l'inscription reste valide si l'envoi échoue)
         try { await cred.user.sendEmailVerification(); } catch (mailErr) { console.warn('Vérification e-mail non envoyée', mailErr); }
-        showToast('Bienvenue au GREC ' + prenom + ' ! Un e-mail de confirmation vous a été envoyé.', 'success');
-        setTimeout(() => window.location.href = getHomeHref(), 2800);
+        await auth.signOut(); // comme sur l'ancien site : le compte doit être validé par un administrateur avant la première connexion
+        showToast('Merci ' + prenom + ' ! Votre demande d\'inscription a bien été envoyée. Un administrateur du GREC va la valider : vous pourrez ensuite vous connecter.', 'success', 9000);
+        setTimeout(() => window.location.href = getHomeHref(), 6000);
       } catch (err) {
         const msg = { 'auth/email-already-in-use': 'Cet email est déjà utilisé.', 'auth/invalid-email': 'Email invalide.', 'auth/weak-password': 'Mot de passe trop faible.' }[err.code] || err.message;
+        window.GREC_REGISTERING = false;
         document.getElementById('reg-email-err').textContent = msg;
         showToast(msg, 'error');
       } finally {
@@ -1063,7 +1066,7 @@
       }
     }
 
-    auth.onAuthStateChanged(user => { if (user) window.location.href = getHomeHref(); });
+    auth.onAuthStateChanged(user => { if (user && !window.GREC_REGISTERING) window.location.href = getHomeHref(); });
   </script>
 </body>
 

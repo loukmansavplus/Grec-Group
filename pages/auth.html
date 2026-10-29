@@ -716,7 +716,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="../js/firebase-config.js?v=5"></script>
-  <script src="../js/utils.js?v=5"></script>
+  <script src="../js/utils.js?v=6"></script>
 
   <script>
     if (new URLSearchParams(location.search).get('tab') === 'register') {
@@ -741,10 +741,22 @@
       btn.disabled = true;
       btn.innerHTML = '<div class="spin"></div> Connexion…';
       try {
+        window.GREC_REGISTERING = true; // le blocage est géré ici
         await auth.signInWithEmailAndPassword(email, pwd);
+        const state = await memberAccessState(auth.currentUser);
+        if (state !== 'admin' && state !== 'actif') {
+          await auth.signOut();
+          window.GREC_REGISTERING = false;
+          const m = accessDeniedMessage(state);
+          document.getElementById('login-email-err').textContent = m;
+          showToast(m, 'info', 8000);
+          return;
+        }
+        window.GREC_REGISTERING = false;
         showToast('Connexion réussie ! Bienvenue.', 'success');
         setTimeout(() => window.location.href = getHomeHref(), 1200);
       } catch (err) {
+        window.GREC_REGISTERING = false;
         const msg = { 'auth/user-not-found': 'Email ou mot de passe incorrect.', 'auth/wrong-password': 'Email ou mot de passe incorrect.', 'auth/invalid-credential': 'Email ou mot de passe incorrect.', 'auth/invalid-login-credentials': 'Email ou mot de passe incorrect.', 'auth/invalid-email': 'Email invalide.', 'auth/too-many-requests': 'Trop de tentatives. Réessayez plus tard.', 'auth/network-request-failed': 'Problème de connexion réseau.' }[err.code] || err.message;
         document.getElementById('login-email-err').textContent = msg;
         showToast(msg, 'error');
@@ -766,7 +778,7 @@
     function loginLinkedin() { showToast('LinkedIn OAuth — fonctionnalité à activer dans Firebase.', 'info'); }
 
     // Redirect if already logged in — go to homepage
-    auth.onAuthStateChanged(user => { if (user) window.location.href = getHomeHref(); });
+    auth.onAuthStateChanged(user => { if (user && !window.GREC_REGISTERING) window.location.href = getHomeHref(); });
   </script>
 </body>
 

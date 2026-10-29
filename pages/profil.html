@@ -543,7 +543,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="../js/firebase-config.js?v=5"></script>
-    <script src="../js/utils.js?v=5"></script>
+    <script src="../js/utils.js?v=6"></script>
     <script>
         const profileState = {
             uid: null,
@@ -709,6 +709,10 @@
             const data = currentFormData();
             try {
                 await db.collection(COLLECTIONS.MEMBRES).doc(profileState.uid).set(data, { merge: true });
+                try {
+                    const fresh = await db.collection(COLLECTIONS.MEMBRES).doc(profileState.uid).get();
+                    if (fresh.exists) await syncAnnuaireEntry(profileState.uid, fresh.data());
+                } catch (syncErr) { console.warn('Annuaire non mis à jour', syncErr); }
                 if (auth.currentUser) {
                     await auth.currentUser.updateProfile({
                         displayName: data.nom || auth.currentUser.displayName || '',

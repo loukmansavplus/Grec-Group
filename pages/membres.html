@@ -497,7 +497,7 @@
           Les entrepreneurs<br /><span class="text-gold-light italic">du réseau GREC</span>
         </h1>
         <p class="text-white/60 mt-4 max-w-xl text-base leading-relaxed">
-          Des femmes et hommes d'affaires aux talents complémentaires, présents au Bénin et dans 15 pays de la diaspora,
+          Des femmes et hommes d'affaires aux talents complémentaires, présents au Bénin et dans la diaspora,
           unis par des valeurs communes d'excellence et de solidarité.
         </p>
       </div>
@@ -505,7 +505,7 @@
       <!-- Statistiques réseau -->
       <div class="flex flex-wrap items-center gap-6 md:gap-10 mt-10 reveal">
         <div class="hero-stat">
-          <div class="hero-stat-num">180+</div>
+          <div class="hero-stat-num" id="hero-member-count">&nbsp;</div>
           <div class="text-white/50 text-xs mt-1">Membres actifs</div>
         </div>
         <div class="hero-stat-sep"></div>
@@ -558,12 +558,15 @@
         <div class="filter-scroll-row flex items-center gap-3 pb-1">
           <span class="text-xs text-slate-400 shrink-0">Secteur :</span>
           <button class="filter-chip active" onclick="setSecteur(this,'all')">Tous</button>
-          <button class="filter-chip" onclick="setSecteur(this,'tech')">Tech & Digital</button>
-          <button class="filter-chip" onclick="setSecteur(this,'agro')">Agroalimentaire</button>
-          <button class="filter-chip" onclick="setSecteur(this,'finance')">Finance</button>
-          <button class="filter-chip" onclick="setSecteur(this,'commerce')">Commerce</button>
-          <button class="filter-chip" onclick="setSecteur(this,'sante')">Santé</button>
-          <button class="filter-chip" onclick="setSecteur(this,'immobilier')">Immobilier</button>
+          <button class="filter-chip" onclick="setSecteur(this,'administration et services')">Administration et services</button>
+          <button class="filter-chip" onclick="setSecteur(this,'technique')">Technique</button>
+          <button class="filter-chip" onclick="setSecteur(this,'santé')">Santé</button>
+          <button class="filter-chip" onclick="setSecteur(this,'coaching')">Coaching</button>
+          <button class="filter-chip" onclick="setSecteur(this,'artisanat')">Artisanat</button>
+          <button class="filter-chip" onclick="setSecteur(this,'distribution')">Distribution</button>
+          <button class="filter-chip" onclick="setSecteur(this,'immobilier et foncier')">Immobilier et foncier</button>
+          <button class="filter-chip" onclick="setSecteur(this,'tech et digital')">Tech et digital</button>
+          <button class="filter-chip" onclick="setSecteur(this,'culture et sports')">Culture et sports</button>
           <div class="flex border border-slate-200 rounded-lg overflow-hidden ml-2 shrink-0">
             <button class="vue-btn active" id="vue-grid" onclick="setVue('grid')" title="Grille">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -578,7 +581,7 @@
           </div>
         </div>
       </div>
-      <div class="mt-2 text-xs text-slate-400" id="membres-count">Affichage de 12 membres sur 180+</div>
+      <div class="mt-2 text-xs text-slate-400" id="membres-count">Chargement des membres…</div>
     </div>
   </div>
 
@@ -588,344 +591,7 @@
 
       <!-- Vue grille -->
       <div id="membres-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-        <!-- Membre 1 -->
-        <div class="membre-card reveal" data-nom="Kofi Adjovi" data-secteur="tech" data-pays="Bénin"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <!-- IMAGE PLACEHOLDER — remplacer par photoURL depuis Firestore -->
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">KA</div>
-              <span>Photo à placer</span>
-            </div>
-            <!-- <img loading="lazy" decoding="async" src="../Assets/membres/kofi-adjovi.jpg" alt="Kofi Adjovi" /> -->
-            <div class="pays-badge">Cotonou</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Kofi Adjovi</h3>
-              <span class="secteur-badge">Tech</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">CEO · AfriTech Solutions</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Pionnier du e-commerce au Bénin, fondateur de
-              la première place de marché B2B francophone en Afrique de l'Ouest.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Actif
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2018</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 2 -->
-        <div class="membre-card reveal" data-nom="Aïssatou Kéïta" data-secteur="finance" data-pays="France"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">AK</div>
-              <span>Photo à placer</span>
-            </div>
-            <!-- <img loading="lazy" decoding="async" src="../Assets/membres/aissatou-keita.jpg" alt="Aïssatou Kéïta" /> -->
-            <div class="pays-badge">Paris</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Aïssatou Kéïta</h3>
-              <span class="secteur-badge">Finance</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">Directrice · Invest Diaspora</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Spécialiste du financement diaspora-Afrique,
-              elle accompagne les investisseurs béninois de France dans leurs projets au pays.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Active
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2020</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 3 -->
-        <div class="membre-card reveal" data-nom="Rodrigue Dossou" data-secteur="agro" data-pays="Bénin"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">RD</div>
-              <span>Photo à placer</span>
-            </div>
-            <!-- <img loading="lazy" decoding="async" src="../Assets/membres/rodrigue-dossou.jpg" alt="Rodrigue Dossou" /> -->
-            <div class="pays-badge">Parakou</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Rodrigue Dossou</h3>
-              <span class="secteur-badge">Agro</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">Directeur · AgroBénin Export</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Transformateur de produits agricoles locaux,
-              expert en chaîne de valeur ananas et karité, lauréat Prix National de l'Innovation agricole 2023.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Actif
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2019</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 4 -->
-        <div class="membre-card reveal" data-nom="Marie-Claire Agossou" data-secteur="commerce" data-pays="Canada"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">MA</div>
-              <span>Photo à placer</span>
-            </div>
-            <!-- <img loading="lazy" decoding="async" src="../Assets/membres/marie-claire-agossou.jpg" alt="Marie-Claire Agossou" /> -->
-            <div class="pays-badge">Montréal</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Marie-Claire Agossou</h3>
-              <span class="secteur-badge">Commerce</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">Fondatrice · Artisans du Golfe</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Importatrice et distributrice d'artisanat
-              béninois premium au Canada, elle crée des ponts entre artisans locaux et marchés nord-américains.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Active
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2021</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 5 -->
-        <div class="membre-card reveal" data-nom="Sébastien Hounsou" data-secteur="immobilier" data-pays="Bénin"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">SH</div>
-              <span>Photo à placer</span>
-            </div>
-            <!-- <img loading="lazy" decoding="async" src="../Assets/membres/sebastien-hounsou.jpg" alt="Sébastien Hounsou" /> -->
-            <div class="pays-badge">Cotonou</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Sébastien Hounsou</h3>
-              <span class="secteur-badge">Immobilier</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">Gérant · SH Promotions</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Promoteur immobilier spécialisé dans les
-              résidences pour la diaspora, avec plus de 120 logements livrés à Cotonou et Calavi depuis 2016.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Actif
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2017</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 6 -->
-        <div class="membre-card reveal" data-nom="Fatoumata Diallo" data-secteur="sante" data-pays="France"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">FD</div>
-              <span>Photo à placer</span>
-            </div>
-            <!-- <img loading="lazy" decoding="async" src="../Assets/membres/fatoumata-diallo.jpg" alt="Fatoumata Diallo" /> -->
-            <div class="pays-badge">Lyon</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Fatoumata Diallo</h3>
-              <span class="secteur-badge">Santé</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">Docteure · PharmaDev Africa</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Pharmacienne et entrepreneuse, elle développe
-              une chaîne de pharmacies modernes au Bénin avec un modèle de franchise adapté au marché africain.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Active
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2022</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 7 -->
-        <div class="membre-card reveal" data-nom="Arnaud Gbeha" data-secteur="tech" data-pays="Allemagne"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">AG</div>
-              <span>Photo à placer</span>
-            </div>
-            <!-- <img loading="lazy" decoding="async" src="../Assets/membres/arnaud-gbeha.jpg" alt="Arnaud Gbeha" /> -->
-            <div class="pays-badge">Berlin</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Arnaud Gbeha</h3>
-              <span class="secteur-badge">Tech</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">CTO · FinPay Africa</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Ingénieur fintech basé à Berlin, il développe
-              des solutions de paiement mobile adaptées aux besoins des marchés africains non bancarisés.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Actif
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2023</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 8 -->
-        <div class="membre-card reveal" data-nom="Claudine Azonsi" data-secteur="agro" data-pays="Bénin"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">CA</div>
-              <span>Photo à placer</span>
-            </div>
-            <!-- <img loading="lazy" decoding="async" src="../Assets/membres/claudine-azonsi.jpg" alt="Claudine Azonsi" /> -->
-            <div class="pays-badge">Porto-Novo</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Claudine Azonsi</h3>
-              <span class="secteur-badge">Agro</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">PDG · NaturaBenin</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Pionnière dans la cosmétique naturelle à base
-              d'huile de karité et de noix de palme, ses produits sont exportés dans 8 pays d'Europe et du Moyen-Orient.
-            </p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Active
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2019</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 9 -->
-        <div class="membre-card reveal" data-nom="Pascal Kpossou" data-secteur="finance" data-pays="Bénin"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">PK</div>
-              <span>Photo à placer</span>
-            </div>
-            <div class="pays-badge">Cotonou</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Pascal Kpossou</h3>
-              <span class="secteur-badge">Finance</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">Expert-Comptable · KP Audit</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Expert-comptable certifié OHADA, il
-              accompagne les PME béninoises dans leur mise en conformité et leur levée de fonds auprès des banques
-              régionales.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Actif
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2016</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 10 -->
-        <div class="membre-card reveal" data-nom="Eunice Toviho" data-secteur="commerce" data-pays="Belgique"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">ET</div>
-              <span>Photo à placer</span>
-            </div>
-            <div class="pays-badge">Bruxelles</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Eunice Toviho</h3>
-              <span class="secteur-badge">Commerce</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">Directrice · AfroLux Brussels</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Spécialiste du commerce de produits
-              afro-caribéens en Europe, elle gère un réseau de 12 boutiques en Belgique et aux Pays-Bas.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Active
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2020</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 11 -->
-        <div class="membre-card reveal" data-nom="Théodore Assogba" data-secteur="immobilier" data-pays="États-Unis"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">TA</div>
-              <span>Photo à placer</span>
-            </div>
-            <div class="pays-badge">Houston</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Théodore Assogba</h3>
-              <span class="secteur-badge">Immobilier</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">Investisseur · TAsset Group</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Investisseur immobilier américano-béninois,
-              il structure des fonds d'investissement pour aider la diaspora à construire un patrimoine durable au
-              Bénin.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Actif
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2021</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Membre 12 -->
-        <div class="membre-card reveal" data-nom="Yolande Akpovi" data-secteur="sante" data-pays="Bénin"
-          onclick="openModal(this)">
-          <div class="photo-wrap">
-            <div class="avatar-placeholder">
-              <div class="avatar-initials">YA</div>
-              <span>Photo à placer</span>
-            </div>
-            <div class="pays-badge">Abomey-Calavi</div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start justify-between mb-1">
-              <h3 class="font-display font-semibold text-navy text-base leading-tight">Yolande Akpovi</h3>
-              <span class="secteur-badge">Santé</span>
-            </div>
-            <p class="text-slate-500 text-xs mb-2">Fondatrice · Clinique Sante+</p>
-            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">Médecin-entrepreneur, elle a créé le premier
-              réseau de cliniques ambulatoires à tarification sociale au Bénin, avec 3 centres et plus de 15 000
-              patients suivis.</p>
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-xs text-green-600 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Active
-              </span>
-              <span class="text-xs text-slate-400">Membre depuis 2020</span>
-            </div>
-          </div>
-        </div>
-
+        <!-- Les membres sont chargés depuis l'annuaire public (collection « annuaire ») -->
       </div><!-- /membres-grid -->
 
       <!-- Vue liste (cachée par défaut) -->
@@ -970,7 +636,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                 </svg>
               </span>
-              <span class="text-slate-600 text-sm">Accès à l'annuaire complet de 180+ membres avec coordonnées</span>
+              <span class="text-slate-600 text-sm">Accès à l'annuaire complet des membres</span>
             </li>
             <li class="flex items-start gap-3">
               <span class="w-5 h-5 bg-gold rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
@@ -1195,7 +861,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="../js/firebase-config.js?v=5"></script>
-  <script src="../js/utils.js?v=5"></script>
+  <script src="../js/utils.js?v=6"></script>
 
   <script>
     let currentSecteur = 'all';
@@ -1205,7 +871,7 @@
 
     // -- Filtre secteur: mémorise le chip actif puis relance recherche + pagination. --
     function setSecteur(btn, secteur) {
-      currentSecteur = secteur;
+      currentSecteur = String(secteur).toLowerCase();
       currentPage = 1;
       document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -1466,8 +1132,8 @@
     // -- Chargement Firestore: remplace la grille statique par les vrais profils publics quand la base répond. --
     async function loadMembresFromFirestore() {
       try {
-        const snap = await db.collection(COLLECTIONS.MEMBRES).where('statut', '==', 'actif').limit(100).get();
-        if (snap.empty) return; // garder le contenu statique si vide
+        const snap = await db.collection('annuaire').limit(300).get();
+        if (snap.empty) { document.getElementById('hero-member-count').textContent = '0'; filterMembres(); return; }
         const docs = [];
         snap.forEach(doc => {
           docs.push(doc);
@@ -1479,14 +1145,13 @@
         });
         const html = [];
         docs.forEach(doc => {
-          const data = doc.data() || {};
-          if (data.publicProfileEnabled === false) return;
           html.push(renderMemberCard(doc));
         });
-        if (!html.length) return;
         document.getElementById('membres-grid').innerHTML = html.join('');
+        document.getElementById('hero-member-count').textContent = String(html.length);
         currentPage = 1;
         filterMembres();
+        initScrollReveal();
       } catch (e) {
         console.log('Firestore non configuré — contenu statique affiché');
       }

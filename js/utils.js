@@ -178,6 +178,7 @@ async function ensureMemberProfile(user) {
     const ref = db.collection(COLLECTIONS.MEMBRES).doc(user.uid);
     const snap = await ref.get();
     if (!snap.exists) {
+      const isAdm = await isCurrentUserAdmin(user);
       await ref.set({
         nom: user.displayName || user.email?.split('@')[0] || 'Membre',
         prenom: '',
@@ -186,7 +187,7 @@ async function ensureMemberProfile(user) {
         telephone: '',
         pays: '',
         secteur: '',
-        statut: 'actif',
+        statut: isAdm ? 'actif' : 'en_attente',
         codeEthique: true,
         role: ROLES.MEMBRE,
         publicProfileEnabled: true,
@@ -202,6 +203,44 @@ async function ensureMemberProfile(user) {
   } catch (error) {
     console.warn('Sync membre impossible:', error);
     return false;
+  }
+}
+
+// État d'accès d'un compte : 'admin', 'actif', 'en_attente', 'suspendu'… (comme l'ancien site : connexion réservée aux membres validés)
+async function memberAccessState(user) {
+  if (!user) return 'visiteur';
+  try {
+    if (await isCurrentUserAdmin(user)) return 'admin';
+    const snap = await db.collection(COLLECTIONS.MEMBRES).doc(user.uid).get();
+    return snap.exists ? (snap.data().statut || 'actif') : 'en_attente';
+  } catch (e) {
+    return 'actif'; // en cas d'erreur réseau, on ne bloque pas (les règles de la base protègent de toute façon)
+  }
+}
+
+function accessDeniedMessage(state) {
+  return state === 'en_attente'
+    ? "Votre inscription est en attente de validation par un administrateur du GREC. Vous pourrez vous connecter dès qu'elle sera validée."
+    : "Votre compte n'est pas actif. Contactez un administrateur du GREC.";
+}
+
+// Annuaire public : copie des champs publics d'un membre validé (sans e-mail ni téléphone). Supprimée si le membre n'est plus actif/public.
+async function syncAnnuaireEntry(uid, data) {
+  try {
+    const ref = db.collection('annuaire').doc(uid);
+    if (data && data.statut === 'actif' && data.publicProfileEnabled !== false) {
+      const entry = {
+        nom: data.nom || '', secteur: data.secteur || '', pays: data.pays || '', ville: data.ville || '', poste: data.poste || '',
+        bio: data.bio || '', photoURL: data.photoURL || '', showPhoto: data.showPhoto !== false, showBio: data.showBio !== false,
+        showLocation: data.showLocation !== false, createdAt: data.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      await ref.set(entry);
+    } else {
+      await ref.delete();
+    }
+  } catch (e) {
+    console.warn('Annuaire non synchronisé:', e);
   }
 }
 
@@ -333,6 +372,18 @@ function initAuthState() {
 
     await ensureMemberProfile(user);
     const isAdmin = await isCurrentUserAdmin(user);
+
+    // Comme sur l'ancien site : un compte non validé ne peut pas rester connecté
+    if (!isAdmin && !window.GREC_REGISTERING) {
+      const state = await memberAccessState(user);
+      if (state !== 'actif') {
+        try { await auth.signOut(); } catch (e) { /* ignoré */ }
+        setVisitorView();
+        document.body.classList.remove('user-authenticated');
+        showToast(accessDeniedMessage(state), 'info', 8000);
+        return;
+      }
+    }
 
     // Utilisateur connecté : masquer immédiatement les liens de visiteur
     hide(loginLinks);
