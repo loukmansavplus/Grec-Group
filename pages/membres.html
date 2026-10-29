@@ -554,6 +554,11 @@
             oninput="filterMembres()" />
         </div>
 
+        <!-- Filtre pays (liste construite à partir des membres affichés) -->
+        <select id="pays-filter" class="form-input md:max-w-[200px]" aria-label="Filtrer par pays" onchange="currentPage = 1; filterMembres()">
+          <option value="">Tous les pays</option>
+        </select>
+
         <!-- Filtres secteur + vue -->
         <div class="filter-scroll-row flex items-center gap-3 pb-1">
           <span class="text-xs text-slate-400 shrink-0">Secteur :</span>
@@ -888,7 +893,8 @@
         const txt = card.textContent.toLowerCase();
         const matchSearch = !q || txt.includes(q) || nom.includes(q) || pays.includes(q);
         const matchSecteur = currentSecteur === 'all' || secteur === currentSecteur;
-        const isMatch = matchSearch && matchSecteur;
+        const paysSel = (document.getElementById('pays-filter')?.value || '').toLowerCase();
+        const isMatch = matchSearch && matchSecteur && (!paysSel || pays === paysSel);
         card.dataset.match = isMatch ? 'true' : 'false';
         if (isMatch) visible++;
       });
@@ -899,6 +905,7 @@
     // -- Reset filtres: revient au premier chip et à la première page. --
     function resetFilter() {
       document.getElementById('search-input').value = '';
+      const pf = document.getElementById('pays-filter'); if (pf) pf.value = '';
       currentSecteur = 'all';
       currentPage = 1;
       document.querySelectorAll('.filter-chip').forEach((b, i) => b.classList.toggle('active', i === 0));
@@ -1147,6 +1154,11 @@
         });
         document.getElementById('membres-grid').innerHTML = html.join('');
         document.getElementById('hero-member-count').textContent = String(html.length);
+        const pf = document.getElementById('pays-filter');
+        if (pf) {
+          const pays = [...new Set(docs.map(d => String(d.data()?.pays || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+          pf.innerHTML = '<option value="">Tous les pays</option>' + pays.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+        }
         currentPage = 1;
         filterMembres();
         initScrollReveal();
