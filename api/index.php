@@ -62,6 +62,10 @@ function apply_set($coll, $id, $data, $merge, $uid)
     $new = ($merge && $old !== null) ? deep_merge($old, $data) : $data;
     if (!doc_size_ok($new)) fail(413, 'too-large', 'Document trop volumineux');
     $op = $old === null ? 'create' : 'update';
+    if (!$uid) { // visiteurs : formulaires publics (newsletter, contact) limités par adresse IP
+        if (attempts_exceeded('anonw:' . client_ip(), 30, 60)) fail(429, 'resource-exhausted', 'Trop de requêtes, réessayez plus tard.');
+        record_attempt('anonw:' . client_ip());
+    }
     if (!can_write($op, $coll, $id, $old, $new, $uid)) fail(403, 'permission-denied', 'Missing or insufficient permissions.');
     doc_put($coll, $id, $new);
     return $id;

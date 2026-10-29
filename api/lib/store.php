@@ -102,7 +102,8 @@ function doc_delete($coll, $id)
 {
     q('DELETE FROM app_doc WHERE coll = ? AND id = ?', array($coll, $id));
     // suppression des sous-collections éventuelles (ex. messages d'une conversation)
-    q('DELETE FROM app_doc WHERE coll LIKE ?', array($coll . '/' . $id . '/%'));
+    $esc = str_replace(array('\\', '%', '_'), array('\\\\', '\\%', '\\_'), $coll . '/' . $id . '/');
+    q("DELETE FROM app_doc WHERE coll LIKE ? ESCAPE '\\\\'", array($esc . '%'));
 }
 
 function loose_equal($a, $b)

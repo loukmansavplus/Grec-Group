@@ -712,9 +712,7 @@
 
   <div id="toast-container"></div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="../js/backend-ovh.js?v=1"></script>
   <script src="../js/firebase-config.js?v=5"></script>
   <script src="../js/utils.js?v=6"></script>
 
@@ -774,8 +772,8 @@
         .catch(e => showToast(e.message, 'error'));
     }
 
-    function loginGoogle() { showToast('Google OAuth — fonctionnalité à activer dans Firebase.', 'info'); }
-    function loginLinkedin() { showToast('LinkedIn OAuth — fonctionnalité à activer dans Firebase.', 'info'); }
+    function loginGoogle() { showToast('Connexion avec Google : bientôt disponible.', 'info'); }
+    function loginLinkedin() { showToast('Connexion avec LinkedIn : bientôt disponible.', 'info'); }
 
     // Redirect if already logged in — go to homepage
     auth.onAuthStateChanged(user => { if (user && !window.GREC_REGISTERING) window.location.href = getHomeHref(); });
