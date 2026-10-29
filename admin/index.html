@@ -632,6 +632,7 @@
                   <tbody id="member-list"></tbody>
                 </table>
               </div>
+              <div id="member-pager" class="flex items-center justify-center gap-4 mt-3"></div>
             </div>
           </div>
         </section>
@@ -1585,7 +1586,10 @@
       }
     }
 
-    function renderMemberList(items) {
+    let memberPage = 1;
+    const MEMBER_PAGE_SIZE = 25;
+    function renderMemberList(items, keepPage) {
+      if (!keepPage) memberPage = 1;
       const q = (els.memberSearch.value || '').trim().toLowerCase();
       const statusFilter = els.memberStatusFilter.value;
       const filtered = items.filter(item => {
@@ -1597,9 +1601,22 @@
         return matchesSearch && matchesStatus;
       });
 
-      els.memberCount.textContent = `${filtered.length} membre${filtered.length > 1 ? 's' : ''}`;
+      // comme l'ancien site : les inscriptions en attente d'abord
+      filtered.sort((a, b) => (String(b.statut) === 'en_attente') - (String(a.statut) === 'en_attente'));
+      const pages = Math.max(1, Math.ceil(filtered.length / MEMBER_PAGE_SIZE));
+      if (memberPage > pages) memberPage = pages;
+      const pending = filtered.filter(m => String(m.statut) === 'en_attente').length;
+      els.memberCount.textContent = `${filtered.length} membre${filtered.length > 1 ? 's' : ''}${pending ? ' dont ' + pending + ' en attente' : ''}`;
+      const pager = document.getElementById('member-pager');
+      if (pager) {
+        pager.innerHTML = pages > 1 ? `<button type="button" class="mini-btn bg-slate-100 text-slate-700" id="member-prev" ${memberPage <= 1 ? 'disabled' : ''}>Précédent</button><span class="text-sm text-slate-500">Page ${memberPage} / ${pages}</span><button type="button" class="mini-btn bg-slate-100 text-slate-700" id="member-next" ${memberPage >= pages ? 'disabled' : ''}>Suivant</button>` : '';
+        const go = d => { memberPage += d; renderMemberList(items, true); };
+        const pv = document.getElementById('member-prev'); if (pv) pv.onclick = () => go(-1);
+        const nx = document.getElementById('member-next'); if (nx) nx.onclick = () => go(1);
+      }
+      const pageItems = filtered.slice((memberPage - 1) * MEMBER_PAGE_SIZE, memberPage * MEMBER_PAGE_SIZE);
 
-      els.memberList.innerHTML = filtered.map(item => `
+      els.memberList.innerHTML = pageItems.map(item => `
         <tr class="table-row border-b border-slate-100">
           <td class="px-4 py-3">
             <div class="font-semibold text-navy">${escapeHtml(item.nom || 'Membre')}</div>

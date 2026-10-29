@@ -76,6 +76,20 @@ function auth_error($status, $code)
     fail($status, $code, $code);
 }
 
+// Compte migré (uid legacy-m<id> / legacy-a<id>) : vérifie le mot de passe saisi contre le SHA-512 de l'ancienne table.
+// La table d'origine n'est jamais modifiée. Si elle est absente (base de test), la réponse est simplement non.
+function legacy_password_ok($uid, $password)
+{
+    if (!preg_match('/^legacy-([ma])(\d+)$/', (string) $uid, $m)) return false;
+    try {
+        $sql = $m[1] === 'm' ? 'SELECT password FROM g_membre WHERE id_membre = ?' : 'SELECT password FROM g_admin WHERE id_admin = ?';
+        $r = q($sql, array((int) $m[2]))->fetch();
+    } catch (Exception $e) {
+        return false;
+    }
+    return $r && preg_match('/^[0-9a-f]{128}$/i', (string) $r['password']) && hash_equals(strtolower($r['password']), hash('sha512', $password));
+}
+
 function do_login($email, $password)
 {
     $email = strtolower(trim((string) $email));
@@ -93,6 +107,9 @@ function do_login($email, $password)
         } elseif (!empty($u['pass_sha512']) && hash_equals(strtolower($u['pass_sha512']), hash('sha512', (string) $password))) {
             $ok = true; // mot de passe de l'ancien site : on le remplace par un hachage moderne
             q('UPDATE app_user SET pass_hash = ?, pass_sha512 = NULL WHERE uid = ?', array(password_hash((string) $password, PASSWORD_DEFAULT), $u['uid']));
+        } elseif (empty($u['pass_hash']) && empty($u['pass_sha512']) && legacy_password_ok($u['uid'], (string) $password)) {
+            $ok = true; // mot de passe lu dans les anciennes tables g_membre / g_admin (même base), puis remplacé par un hachage moderne
+            q('UPDATE app_user SET pass_hash = ? WHERE uid = ?', array(password_hash((string) $password, PASSWORD_DEFAULT), $u['uid']));
         }
     }
     if (!$ok) { record_attempt($mailKey); record_attempt($ipKey); auth_error(401, 'auth/invalid-credential'); }
