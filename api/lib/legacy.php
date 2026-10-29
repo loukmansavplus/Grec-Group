@@ -6,6 +6,8 @@ function legacy_available()
 {
     static $ok = null;
     if ($ok === null) {
+        $c = cfg();
+        if (empty($c['legacy_mirror'])) return $ok = false; // activé seulement dans la config du vrai site
         try { q('SELECT 1 FROM g_membre LIMIT 1'); $ok = true; } catch (Exception $e) { $ok = false; }
     }
     return $ok;

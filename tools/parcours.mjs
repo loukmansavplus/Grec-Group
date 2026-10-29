@@ -65,7 +65,7 @@ try {
   const p0 = await actor();
   await login(p0, ADMIN_EMAIL, ADMIN_PW);
   await p0.goto(url('/admin/'), { waitUntil: 'networkidle2' }); await sleep(4500);
-  const base = await p0.evaluate(() => ({ membres: Number((document.getElementById('stat-membres')?.innerText || '0').trim()), valider: [...document.querySelectorAll('#member-list [data-action="toggle-member"]')].filter((x) => x.innerText.trim() === 'Valider').length }));
+  const base = await p0.evaluate(() => ({ membres: Number((document.getElementById('stat-membres')?.innerText || '0').trim()), valider: Number(((document.getElementById('member-count')?.innerText || '').match(/dont (\d+) en attente/) || [0, 0])[1]) }));
   console.log('   (état de départ du tableau de bord : ' + JSON.stringify(base) + ')');
   const r = await actor();
   await r.goto(url('/pages/register'), { waitUntil: 'networkidle2' });
@@ -84,7 +84,7 @@ try {
 
   const a = await actor();
   await login(a, ADMIN_EMAIL, ADMIN_PW);
-  const readDash = async () => { await a.goto(url('/admin/'), { waitUntil: 'networkidle2' }); await sleep(4500); return a.evaluate(() => ({ membres: Number((document.getElementById('stat-membres')?.innerText || '0').trim()), valider: [...document.querySelectorAll('#member-list [data-action="toggle-member"]')].filter((x) => x.innerText.trim() === 'Valider').length })); };
+  const readDash = async () => { await a.goto(url('/admin/'), { waitUntil: 'networkidle2' }); await sleep(4500); return a.evaluate(() => ({ membres: Number((document.getElementById('stat-membres')?.innerText || '0').trim()), valider: Number(((document.getElementById('member-count')?.innerText || '').match(/dont (\d+) en attente/) || [0, 0])[1]) })); };
   const dash = await readDash();
   check('tableau de bord : le nouvel inscrit apparaît « en attente » (membres +1, bouton Valider +1)', dash.membres === base.membres + 1 && dash.valider === base.valider + 1, JSON.stringify({ base, dash }));
   const clicked = await a.evaluate(() => { const row = [...document.querySelectorAll('#member-list tr')].find((tr) => /Parcours Test/.test(tr.innerText)); if (!row) return false; row.querySelector('[data-action="toggle-member"]').click(); return true; });
