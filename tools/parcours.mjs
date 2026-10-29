@@ -9,6 +9,17 @@ const BASE = (process.env.BASE || 'http://localhost:8099').replace(/\/$/, '');
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const { ADMIN_EMAIL, ADMIN_PW, M1_EMAIL, M2_EMAIL, MEMBER_PW } = process.env;
 const MAILLOG = new URL('../api/mail.log', import.meta.url);
+// En ligne (serveur de test), le journal d'e-mails est sur le serveur : lecture par FTP (MAIL_FTP_PATH, FTPU, FTPPW).
+async function readMailLog() {
+  if (!process.env.MAIL_FTP_PATH) return fs.existsSync(MAILLOG) ? fs.readFileSync(MAILLOG, 'utf8') : '';
+  const { execFileSync } = await import('child_process');
+  try { return execFileSync('curl', ['-s', '-m', '30', '--ftp-pasv', '-u', process.env.FTPU + ':' + process.env.FTPPW, 'ftp://ftpcloud.cluster024.hosting.ovh.net/' + process.env.MAIL_FTP_PATH], { encoding: 'utf8' }); } catch (e) { return ''; }
+}
+async function clearMailLog() {
+  if (!process.env.MAIL_FTP_PATH) { fs.writeFileSync(MAILLOG, ''); return; }
+  const { execFileSync } = await import('child_process');
+  try { execFileSync('curl', ['-s', '-m', '30', '--ftp-pasv', '-u', process.env.FTPU + ':' + process.env.FTPPW, '-Q', '-DELE ' + process.env.MAIL_FTP_PATH, 'ftp://ftpcloud.cluster024.hosting.ovh.net/']); } catch (e) { /* journal absent : rien à vider */ }
+}
 const T = Date.now(), NEW_EMAIL = `parcours-${T}@example.invalid`, NEW_PW = 'Parcours-Test-2026!', NEW_PW2 = 'Nouveau-Mdp-2026!';
 const url = (p) => BASE + (p.startsWith('/pages/') && !p.endsWith('.html') ? p + '.html' : p);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -42,7 +53,8 @@ try {
   check('actualités : 6 articles sur la page 1 (7 au total, pagination)', (await v.evaluate(() => document.querySelectorAll('#articles-container article').length)) === 6);
   await v.goto(url('/pages/membres'), { waitUntil: 'networkidle2' }); await sleep(3000);
   const mem = await v.evaluate(() => ({ n: document.getElementById('hero-member-count')?.innerText, priv: /@|\+\d{6,}/.test(document.getElementById('membres-grid').innerText) }));
-  check('annuaire public : 24 membres, sans e-mail ni téléphone', mem.n === '24' && !mem.priv, JSON.stringify(mem));
+  const baseAnnuaire = Number(mem.n);
+  check('annuaire public : des membres affichés, sans e-mail ni téléphone', baseAnnuaire > 0 && !mem.priv, JSON.stringify(mem));
   await v.goto(url('/'), { waitUntil: 'networkidle2' });
   await v.evaluate(() => { const i = document.getElementById('newsletter-email'); i.value = 'abonne-' + Date.now() + '@example.invalid'; });
   await v.evaluate(() => document.getElementById('newsletter-form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })));
@@ -50,6 +62,11 @@ try {
   check('inscription à la newsletter', /Abonnement confirmé/.test(await toast(v)), await toast(v));
 
   console.log('\n=== INSCRIPTION, VALIDATION, CONNEXION');
+  const p0 = await actor();
+  await login(p0, ADMIN_EMAIL, ADMIN_PW);
+  await p0.goto(url('/admin/'), { waitUntil: 'networkidle2' }); await sleep(4500);
+  const base = await p0.evaluate(() => ({ membres: Number((document.getElementById('stat-membres')?.innerText || '0').trim()), valider: [...document.querySelectorAll('#member-list [data-action="toggle-member"]')].filter((x) => x.innerText.trim() === 'Valider').length }));
+  console.log('   (état de départ du tableau de bord : ' + JSON.stringify(base) + ')');
   const r = await actor();
   await r.goto(url('/pages/register'), { waitUntil: 'networkidle2' });
   await r.type('#reg-prenom', 'Parcours'); await r.type('#reg-nom', 'Test'); await r.type('#reg-email', NEW_EMAIL); await r.type('#reg-phone', '+22900000000');
@@ -67,27 +84,28 @@ try {
 
   const a = await actor();
   await login(a, ADMIN_EMAIL, ADMIN_PW);
-  await a.goto(url('/admin/'), { waitUntil: 'networkidle2' }); await sleep(4000);
-  const dash = await a.evaluate(() => ({ stats: [...document.querySelectorAll('[id^="stat-"]')].map((e) => e.id.replace('stat-', '') + '=' + e.innerText.trim()).join(' '), valider: [...document.querySelectorAll('#member-list [data-action="toggle-member"]')].filter((b) => b.innerText.trim() === 'Valider').length }));
-  check('tableau de bord : 78 membres dont 52 en attente (51 anciens + le nouvel inscrit)', /membres=78/.test(dash.stats) && dash.valider === 52, JSON.stringify(dash));
+  const readDash = async () => { await a.goto(url('/admin/'), { waitUntil: 'networkidle2' }); await sleep(4500); return a.evaluate(() => ({ membres: Number((document.getElementById('stat-membres')?.innerText || '0').trim()), valider: [...document.querySelectorAll('#member-list [data-action="toggle-member"]')].filter((x) => x.innerText.trim() === 'Valider').length })); };
+  const dash = await readDash();
+  check('tableau de bord : le nouvel inscrit apparaît « en attente » (membres +1, bouton Valider +1)', dash.membres === base.membres + 1 && dash.valider === base.valider + 1, JSON.stringify({ base, dash }));
   const clicked = await a.evaluate(() => { const row = [...document.querySelectorAll('#member-list tr')].find((tr) => /Parcours Test/.test(tr.innerText)); if (!row) return false; row.querySelector('[data-action="toggle-member"]').click(); return true; });
   await sleep(3000);
   check('tableau de bord : validation du nouvel inscrit (bouton « Valider »)', clicked && /Membre validé/.test(await toast(a)), await toast(a));
   await v.goto(url('/pages/membres'), { waitUntil: 'networkidle2' }); await sleep(2500);
-  check('l\'annuaire public affiche maintenant 25 membres', (await v.evaluate(() => document.getElementById('hero-member-count')?.innerText)) === '25');
+  check('l\'annuaire public affiche un membre de plus', Number(await v.evaluate(() => document.getElementById('hero-member-count')?.innerText)) === baseAnnuaire + 1);
   const r3 = await actor();
   await login(r3, NEW_EMAIL, NEW_PW);
   check('connexion réussie après validation', await connected(r3) && /index/.test(r3.url()), r3.url());
 
   console.log('\n=== MOT DE PASSE OUBLIÉ');
-  fs.writeFileSync(MAILLOG, '');
+  await clearMailLog();
   const f = await actor();
   await f.goto(url('/pages/auth'), { waitUntil: 'networkidle2' });
   await f.type('#login-email', NEW_EMAIL);
   await f.evaluate(() => showForgot());
   await sleep(3000);
   check('demande de lien envoyée', /envoyé/.test(await toast(f)), await toast(f));
-  const mail = fs.readFileSync(MAILLOG, 'utf8');
+  await sleep(1500);
+  const mail = await readMailLog();
   const tok = (mail.match(/reset-password\.html\?token=([0-9a-f]{64})/) || [])[1];
   check('e-mail de réinitialisation contenant le lien', !!tok && mail.includes('TO: ' + NEW_EMAIL));
   await f.goto(url('/pages/reset-password') + '?token=' + tok, { waitUntil: 'networkidle2' });
@@ -104,7 +122,7 @@ try {
 
   console.log('\n=== MESSAGERIE ENTRE DEUX MEMBRES');
   const c1 = await actor(), c2 = await actor();
-  await login(c1, M1_EMAIL, MEMBER_PW); await login(c2, M2_EMAIL, MEMBER_PW);
+  await login(c1, M1_EMAIL, process.env.M1_PW || MEMBER_PW); await login(c2, M2_EMAIL, process.env.M2_PW || MEMBER_PW);
   check('les deux membres se connectent (membres migrés, actifs)', (await connected(c1)) && (await connected(c2)));
   const uid2 = await c2.evaluate(() => firebase.auth().currentUser.uid);
   await c1.goto(url('/pages/chat'), { waitUntil: 'networkidle2' }); await sleep(3500);
