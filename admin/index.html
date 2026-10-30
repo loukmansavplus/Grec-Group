@@ -170,6 +170,53 @@
     .admin-table-scroll table { width: max-content; min-width: 100%; }
     .admin-table-scroll th, .admin-table-scroll td { white-space: nowrap; word-break: normal !important; overflow-wrap: normal !important; }
     .admin-table-scroll td .flex-wrap { flex-wrap: nowrap; }
+
+    /* ===== Refonte tableau de bord : barre latérale à icônes, une vue par menu, espacements et rayons réduits ===== */
+    body { background: #f3f5f8; }
+    .glass-panel { background: #fff; backdrop-filter: none; box-shadow: none; border: 0; border-bottom: 1px solid #e5e9f0; }
+    aside.glass-panel { background: #0D1B2A; color: #cbd5e1; border: 0; border-right: 1px solid rgba(255,255,255,.06); padding: 1.1rem 0.9rem !important; overflow-y: auto; }
+    aside.glass-panel .text-navy { color: #fff; }
+    aside.glass-panel .text-slate-500 { color: rgba(255,255,255,.55); }
+    aside.glass-panel > a { margin-bottom: 1rem !important; }
+    aside.glass-panel .rounded-2xl.bg-navy { background: rgba(255,255,255,.06); border-radius: 12px; padding: .65rem .75rem; margin-bottom: .9rem !important; }
+    #sidebar-avatar { width: 2.4rem; height: 2.4rem; border-radius: 10px; font-size: 1rem; }
+    .dashboard-nav { display: block; }
+    .dashboard-nav .nav-group { margin: .9rem .5rem .3rem; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: #C8893A; font-weight: 700; }
+    .dashboard-nav a { display: flex; align-items: center; gap: .65rem; padding: .5rem .65rem; border-radius: 8px; color: #cbd5e1; transition: background .15s, color .15s; margin-bottom: 2px; }
+    .dashboard-nav a:hover { background: rgba(255,255,255,.08); color: #fff; }
+    .dashboard-nav a.active { background: rgba(200,137,58,.18); color: #fff; box-shadow: inset 3px 0 0 #C8893A; }
+    .dashboard-nav .nav-ico { width: 1.15rem; height: 1.15rem; flex: none; opacity: .9; }
+    .dashboard-nav a.active .nav-ico { color: #E0A85A; opacity: 1; }
+    .dashboard-nav.mobile-grid a { background: #f1f5f9; color: #0D1B2A; padding: .6rem .75rem; }
+    .dashboard-nav.mobile-grid a.active { background: #0D1B2A; color: #fff !important; box-shadow: none; }
+    .dashboard-nav.mobile-grid a.active span { color: #fff !important; }
+    aside .mini-btn { border-radius: 8px; padding: .45rem .8rem; }
+    aside .space-y-3 > * + * { margin-top: .5rem; }
+    header.glass-panel .px-5 { padding-top: .7rem !important; padding-bottom: .7rem !important; }
+    header.glass-panel h1 { font-size: 1.25rem !important; line-height: 1.5rem; }
+    header.glass-panel p { font-size: .8rem; }
+    main > div.px-5 { padding-top: 1rem !important; padding-bottom: 1.25rem !important; }
+    main > div.space-y-6 > * + * { margin-top: 1rem !important; }
+    .section-card { background: #fff; border: 1px solid #e5e9f0; border-radius: 12px; box-shadow: 0 1px 2px rgba(13,27,42,.04); padding: 1.1rem 1.25rem !important; }
+    .section-card h2 { font-size: 1.35rem !important; line-height: 1.7rem; }
+    .section-card h2 + p { margin-top: .25rem !important; font-size: .85rem; }
+    .section-card .mb-6 { margin-bottom: 1rem !important; }
+    .section-card .mb-3 { margin-bottom: .5rem !important; }
+    .section-card .gap-6 { gap: 1rem !important; }
+    .section-card .gap-4 { gap: .75rem !important; }
+    .section-card .rounded-2xl { border-radius: 10px !important; }
+    .section-card .rounded-xl { border-radius: 8px !important; }
+    .section-card .rounded-3xl { border-radius: 12px !important; }
+    .section-card .overflow-auto { padding: .25rem; }
+    .section-card table th, .section-card table td { padding-top: .55rem !important; padding-bottom: .55rem !important; }
+    .field { border-radius: 8px; padding: .55rem .75rem; font-size: .9rem; }
+    .mini-btn { border-radius: 8px; padding: .4rem .75rem; font-size: .78rem; }
+    .badge { border-radius: 6px; padding: .25rem .55rem; font-size: .68rem; }
+    .admin-view-hidden { display: none !important; }
+    @media (min-width: 1024px) { .lg\:grid-cols-\[300px_1fr\] { grid-template-columns: 250px minmax(0, 1fr) !important; } }
+    main { min-width: 0; }
+    .section-card .flex-1 { min-width: 0; }
+    @media (min-width: 1280px) { #membres .xl\:w-\[420px\] { width: 270px; flex: none; } }
   </style>
   <link rel="stylesheet" href="../css/tailwind-admin.css?v=4" />
 </head>
@@ -178,7 +225,7 @@
   <div class="min-h-screen lg:grid lg:grid-cols-[300px_1fr]">
     <aside class="glass-panel sticky top-0 hidden lg:flex h-screen flex-col p-6">
       <a href="../index.html" class="flex items-center gap-3 mb-8">
-        <img src="../Assets/images/logo.png" alt="GREC" class="h-12 w-12 object-contain" />
+        <img src="../Assets/images/logo-neutre.png" alt="GREC" class="h-12 w-12 object-contain" />
         <div>
           <div class="font-display text-xl font-bold text-navy">GREC</div>
           <div class="text-xs uppercase tracking-[0.28em] text-slate-500">Dashboard admin</div>
@@ -197,23 +244,21 @@
         </div>
       </div>
 
-      <nav class="dashboard-nav flex-1 space-y-2 text-sm font-medium">
-        <a href="#overview"
-          class="block rounded-xl px-4 py-3 hover:bg-navy hover:text-white transition-colors active">Vue d'ensemble</a>
-        <a href="#moderation"
-          class="block rounded-xl px-4 py-3 hover:bg-navy hover:text-white transition-colors">Modération</a>
-        <a href="#actualites"
-          class="block rounded-xl px-4 py-3 hover:bg-navy hover:text-white transition-colors">Actualités</a>
-        <a href="#evenements"
-          class="block rounded-xl px-4 py-3 hover:bg-navy hover:text-white transition-colors">Événements</a>
-        <a href="#galerie"
-          class="block rounded-xl px-4 py-3 hover:bg-navy hover:text-white transition-colors">Galerie</a>
-        <a href="#membres"
-          class="block rounded-xl px-4 py-3 hover:bg-navy hover:text-white transition-colors">Membres</a>
-        <a href="#messages"
-          class="block rounded-xl px-4 py-3 hover:bg-navy hover:text-white transition-colors">Messages</a>
-        <a href="#settings"
-          class="block rounded-xl px-4 py-3 hover:bg-navy hover:text-white transition-colors">Paramètres</a>
+      <nav class="dashboard-nav flex-1 text-sm font-medium" aria-label="Navigation du tableau de bord">
+        <div class="nav-group">Tableau de bord</div>
+        <a href="#overview" data-view="overview"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg><span>Vue d'ensemble</span></a>
+        <div class="nav-group">Contenu</div>
+        <a href="#moderation" data-view="moderation"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>Modération</span></a>
+        <a href="#actualites" data-view="actualites"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span>Actualités</span></a>
+        <a href="#evenements" data-view="evenements"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Événements</span></a>
+        <a href="#galerie" data-view="galerie"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Galerie</span></a>
+        <a href="#partenaires" data-view="partenaires"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg><span>Partenaires</span></a>
+        <div class="nav-group">Communauté</div>
+        <a href="#membres" data-view="membres"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span>Membres</span></a>
+        <a href="#messages" data-view="messages"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg><span>Messages</span></a>
+        <div class="nav-group">Système</div>
+        <a href="#settings" data-view="settings"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span>Paramètres</span></a>
+        <a href="#audit-log" data-view="audit-log"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg><span>Journal d'activité</span></a>
       </nav>
 
       <div class="space-y-3 pt-4">
@@ -245,16 +290,18 @@
           </div>
         </div>
         <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-200 bg-white/95 px-5 py-4">
-          <div class="grid grid-cols-2 gap-2 text-sm font-medium dashboard-nav">
-            <a href="#overview" class="rounded-xl px-4 py-3 bg-slate-100">Vue d'ensemble</a>
-            <a href="#moderation" class="rounded-xl px-4 py-3 bg-slate-100">Modération</a>
-            <a href="#actualites" class="rounded-xl px-4 py-3 bg-slate-100">Actualités</a>
-            <a href="#evenements" class="rounded-xl px-4 py-3 bg-slate-100">Événements</a>
-            <a href="#galerie" class="rounded-xl px-4 py-3 bg-slate-100">Galerie</a>
-            <a href="#membres" class="rounded-xl px-4 py-3 bg-slate-100">Membres</a>
-            <a href="#messages" class="rounded-xl px-4 py-3 bg-slate-100">Messages</a>
-            <a href="#settings" class="rounded-xl px-4 py-3 bg-slate-100">Paramètres</a>
-            <a href="../index.html" class="rounded-xl px-4 py-3 bg-slate-100">Voir le site</a>
+          <div class="grid grid-cols-2 gap-2 text-sm font-medium dashboard-nav mobile-grid">
+            <a href="#overview" data-view="overview"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg><span>Vue d'ensemble</span></a>
+            <a href="#moderation" data-view="moderation"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><span>Modération</span></a>
+            <a href="#actualites" data-view="actualites"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span>Actualités</span></a>
+            <a href="#evenements" data-view="evenements"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Événements</span></a>
+            <a href="#galerie" data-view="galerie"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Galerie</span></a>
+            <a href="#partenaires" data-view="partenaires"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg><span>Partenaires</span></a>
+            <a href="#membres" data-view="membres"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span>Membres</span></a>
+            <a href="#messages" data-view="messages"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg><span>Messages</span></a>
+            <a href="#settings" data-view="settings"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span>Paramètres</span></a>
+            <a href="#audit-log" data-view="audit-log"><svg class="nav-ico" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg><span>Journal d'activité</span></a>
+            <a href="../index.html"><span>Voir le site</span></a>
           </div>
           <div class="mt-3 flex gap-2">
             <button id="refresh-mobile-btn" class="flex-1 mini-btn bg-gold text-white">Rafraîchir</button>
@@ -2168,13 +2215,18 @@
 
     window.addEventListener('beforeunload', cleanupDashboardListeners);
 
-    document.querySelectorAll('.dashboard-nav a').forEach(link => {
-      link.addEventListener('click', () => {
-        document.querySelectorAll('.dashboard-nav a').forEach(item => item.classList.remove('active'));
-        link.classList.add('active');
-        document.getElementById('mobile-menu')?.classList.add('hidden');
-      });
-    });
+    // Chaque menu s'ouvre à part : une seule section visible à la fois, choisie par l'ancre de l'adresse (#membres, #galerie…).
+    const ADMIN_VIEWS = ['overview', 'moderation', 'actualites', 'evenements', 'galerie', 'partenaires', 'membres', 'messages', 'settings', 'audit-log'];
+    function showAdminView() {
+      const wanted = decodeURIComponent((window.location.hash || '').replace('#', ''));
+      const view = ADMIN_VIEWS.includes(wanted) ? wanted : 'overview';
+      ADMIN_VIEWS.forEach(id => document.getElementById(id)?.classList.toggle('admin-view-hidden', id !== view));
+      document.querySelectorAll('.dashboard-nav a[data-view]').forEach(a => a.classList.toggle('active', a.dataset.view === view));
+      document.getElementById('mobile-menu')?.classList.add('hidden');
+      window.scrollTo(0, 0);
+    }
+    window.addEventListener('hashchange', showAdminView);
+    showAdminView();
   </script>
 </body>
 
