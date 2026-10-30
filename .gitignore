@@ -83,3 +83,4 @@ Assets/API USEFULL*
 api/config.php
 api/mail.log
 api/*.log
+api/mail-send.log

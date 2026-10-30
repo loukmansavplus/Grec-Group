@@ -12,7 +12,12 @@ function send_mail($to, $subject, $html)
     $fromAddr = preg_match('/<([^>]+)>/', $from, $m) ? $m[1] : $from;
     $headers = "From: $from\r\nReply-To: $fromAddr\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\nX-Mailer: GREC";
     $subj = '=?UTF-8?B?' . base64_encode($subject) . '?=';
-    return @mail($to, $subj, $html, $headers, '-f' . $fromAddr);
+    $ok = @mail($to, $subj, $html, $headers, '-f' . $fromAddr);
+    if (!$ok) $ok = @mail($to, $subj, $html, $headers); // certains hébergements refusent le paramètre d'expéditeur
+    // résultat noté sans le contenu du message (diagnostic de livraison)
+    @file_put_contents(dirname(__DIR__) . '/mail-send.log', '[' . date('c') . '] TO: ' . $to . ' | ' . ($ok ? 'accepté par le serveur' : 'REFUSÉ par le serveur') . "
+", FILE_APPEND);
+    return $ok;
 }
 
 function mail_template($title, $intro, $buttonLabel, $url)

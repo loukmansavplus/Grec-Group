@@ -2,7 +2,7 @@
 Options -Indexes
 RewriteEngine On
 RewriteRule ^(lib|tests)(/|$) - [F,L]
-RewriteRule ^(config\.php|config\.sample\.php|schema\.sql|mail\.log)$ - [F,L]
+RewriteRule ^(config\.php|config\.sample\.php|schema\.sql|mail\.log|mail-send\.log)$ - [F,L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.php [L]
 <IfModule mod_headers.c>

@@ -7,7 +7,7 @@ HOST = 'ftpcloud.cluster024.hosting.ovh.net'
 SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'api'))
 REMOTE = (sys.argv[1] if len(sys.argv) > 1 else 'api').strip('/')
 EXCLUDE_DIRS = {'tests', 'tools'}
-EXCLUDE_FILES = {'config.php', 'config.sample.php', 'mail.log'}
+EXCLUDE_FILES = {'config.php', 'config.sample.php', 'mail.log', 'mail-send.log'}
 
 ftp = ftplib.FTP(HOST, timeout=60)
 ftp.login(os.environ['FTPU'], os.environ['FTPPW'])
