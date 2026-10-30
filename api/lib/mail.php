@@ -10,6 +10,17 @@ function send_mail($to, $subject, $html)
         return true;
     }
     $fromAddr = preg_match('/<([^>]+)>/', $from, $m) ? $m[1] : $from;
+    if (cfg('mail_mode') === 'smtp') {
+        try {
+            $ok = smtp_send($to, $subject, $html, $from, $fromAddr);
+            $why = 'envoyé par SMTP';
+        } catch (Exception $e) {
+            $ok = false; $why = 'ÉCHEC SMTP : ' . $e->getMessage();
+        }
+        @file_put_contents(dirname(__DIR__) . '/mail-send.log', '[' . date('c') . '] TO: ' . $to . ' | ' . $why . "
+", FILE_APPEND);
+        return $ok;
+    }
     $headers = "From: $from\r\nReply-To: $fromAddr\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\nX-Mailer: GREC";
     $subj = '=?UTF-8?B?' . base64_encode($subject) . '?=';
     $ok = @mail($to, $subj, $html, $headers, '-f' . $fromAddr);
@@ -18,6 +29,66 @@ function send_mail($to, $subject, $html)
     @file_put_contents(dirname(__DIR__) . '/mail-send.log', '[' . date('c') . '] TO: ' . $to . ' | ' . ($ok ? 'accepté par le serveur' : 'REFUSÉ par le serveur') . "
 ", FILE_APPEND);
     return $ok;
+}
+
+
+// Envoi authentifié par SMTP (boîte e-mail du domaine) : les messages sont signés par le serveur de messagerie, bien mieux acceptés que mail().
+function smtp_read($fp)
+{
+    $out = ''; $code = 0;
+    while (($line = fgets($fp, 1024)) !== false) {
+        $out .= $line;
+        $code = (int) substr($line, 0, 3);
+        if (strlen($line) < 4 || $line[3] !== '-') break;
+    }
+    return array($code, trim($out));
+}
+
+function smtp_cmd($fp, $cmd, $expect)
+{
+    if ($cmd !== null) fwrite($fp, $cmd . "\r\n");
+    list($code, $text) = smtp_read($fp);
+    if (!in_array($code, (array) $expect, true)) throw new Exception('SMTP ' . $code . ' ' . substr(preg_replace('/\s+/', ' ', $text), 0, 160));
+    return $text;
+}
+
+function smtp_send($to, $subject, $html, $from, $fromAddr)
+{
+    $host = cfg('smtp_host'); $port = (int) (cfg('smtp_port') ?: 465); $secure = cfg('smtp_secure') ?: 'ssl';
+    $user = cfg('smtp_user'); $pass = cfg('smtp_pass');
+    $fp = @stream_socket_client(($secure === 'ssl' ? 'ssl://' : 'tcp://') . $host . ':' . $port, $errno, $errstr, 15);
+    if (!$fp) throw new Exception('SMTP connexion impossible : ' . $errstr);
+    stream_set_timeout($fp, 20);
+    try {
+        smtp_cmd($fp, null, 220);
+        smtp_cmd($fp, 'EHLO grec.group', 250);
+        if ($secure === 'tls') {
+            smtp_cmd($fp, 'STARTTLS', 220);
+            if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) throw new Exception('SMTP STARTTLS refusé');
+            smtp_cmd($fp, 'EHLO grec.group', 250);
+        }
+        if ($user !== null && $user !== '') {
+            smtp_cmd($fp, 'AUTH LOGIN', 334);
+            smtp_cmd($fp, base64_encode($user), 334);
+            smtp_cmd($fp, base64_encode((string) $pass), 235);
+        }
+        $env = $user ? $user : $fromAddr;
+        smtp_cmd($fp, 'MAIL FROM:<' . $env . '>', 250);
+        smtp_cmd($fp, 'RCPT TO:<' . $to . '>', array(250, 251));
+        smtp_cmd($fp, 'DATA', 354);
+        $domain = substr(strrchr($fromAddr, '@'), 1) ?: 'grec.group';
+        $msg = "From: $from\r\nTo: <$to>\r\nReply-To: $fromAddr\r\nSubject: =?UTF-8?B?" . base64_encode($subject) . "?=\r\nDate: " . date('r')
+            . "\r\nMessage-ID: <" . bin2hex(random_bytes(12)) . "@$domain>\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n"
+            . chunk_split(base64_encode($html), 76, "\r\n");
+        fwrite($fp, $msg . "\r\n.\r\n");
+        smtp_cmd($fp, null, 250);
+        @fwrite($fp, "QUIT\r\n");
+        fclose($fp);
+        return true;
+    } catch (Exception $e) {
+        @fclose($fp);
+        throw $e;
+    }
 }
 
 function mail_template($title, $intro, $buttonLabel, $url)
