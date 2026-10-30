@@ -73,11 +73,5 @@ const STORAGE_PATHS = {
   ,PARTENAIRES:    "partenaires/logos/"
 };
 
-// ── Cloudinary (uploads images depuis le navigateur) ───────
-const CLOUDINARY = {
-  CLOUD_NAME: "ezloqmpj",
-  UPLOAD_PRESET: "grec-upload",
-  UPLOAD_URL: "https://api.cloudinary.com/v1_1/ezloqmpj/image/upload"
-};
 console.log("Firebase connecté :", firebase.app().name);
 

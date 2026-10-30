@@ -84,3 +84,9 @@ api/config.php
 api/mail.log
 api/*.log
 api/mail-send.log
+
+# Images envoyées par les membres (hébergement uniquement)
+uploads/
+
+# Identifiants de test (locaux)
+ADMIN-TEST.local.md

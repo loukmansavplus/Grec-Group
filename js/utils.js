@@ -543,58 +543,36 @@ function initLazyLoad() {
   }
 }
 
-async function uploadFile(file, path) {
-  // Upload un fichier image vers Cloudinary et retourne son URL publique (secure_url)
-  if (!file) throw new Error('Aucun fichier sélectionné.');
-  if (!CLOUDINARY) {
-    throw new Error('Configuration Cloudinary manquante. Vérifiez js/firebase-config.js.');
-  }
-
-  if (!CLOUDINARY.UPLOAD_PRESET) {
-    throw new Error('Cloudinary preset manquant. Vérifiez la valeur UPLOAD_PRESET dans js/firebase-config.js.');
-  }
-
-  if (!CLOUDINARY.UPLOAD_URL) {
-    if (!CLOUDINARY.CLOUD_NAME) {
-      throw new Error('URL Cloudinary manquante. Vérifiez CLOUDINARY.UPLOAD_URL ou CLOUDINARY.CLOUD_NAME dans js/firebase-config.js.');
-    }
-    CLOUDINARY.UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY.CLOUD_NAME}/image/upload`;
-  }
-
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', CLOUDINARY.UPLOAD_PRESET);
-  formData.append('resource_type', 'image');
-
-  // Optionnel: ranger par "dossier logique" basé sur le path historique Firebase
-  if (path) {
-    const folder = String(path).replace(/\/+$/, '');
-    if (folder) formData.append('folder', folder);
-  }
-
-  const response = await fetch(CLOUDINARY.UPLOAD_URL, {
-    method: 'POST',
-    body: formData
+// Réduit une photo avant l'envoi (1600 px max, JPEG) : envoi plus rapide, moins de trafic. GIF et petits fichiers restent tels quels.
+function shrinkImage(file) {
+  return new Promise(resolve => {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 300 * 1024) return resolve(file);
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const r = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.naturalWidth * r));
+      canvas.height = Math.max(1, Math.round(img.naturalHeight * r));
+      const ctx = canvas.getContext('2d');
+      if (file.type !== 'image/png') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const keepPng = file.type === 'image/png';
+      canvas.toBlob(blob => resolve(blob && blob.size < file.size ? blob : file), keepPng ? 'image/png' : 'image/jpeg', 0.86);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
   });
+}
 
-  let data = null;
-  let rawText = '';
-  try {
-    data = await response.json();
-  } catch (jsonError) {
-    rawText = await response.text().catch(() => 'Impossible de lire la réponse Cloudinary.');
-    console.error('Cloudinary upload returned invalid JSON:', jsonError, 'raw response:', rawText);
-  }
-
-  if (!response.ok || !data?.secure_url) {
-    console.error('Cloudinary upload failed response:', data || rawText, 'status:', response.status, response.statusText);
-    const message = data?.error?.message || rawText || `Cloudinary upload échoué (${response.status} ${response.statusText}).`;
-    const code = data?.error?.http_code ? ` (${data.error.http_code})` : '';
-    const details = data?.error?.details ? ` — ${data.error.details}` : '';
-    throw new Error(message + code + details);
-  }
-
-  return data.secure_url;
+async function uploadFile(file, path) {
+  // Envoie une image vers l'hébergement du site (api/upload) et retourne son URL publique
+  if (!file) throw new Error('Aucun fichier sélectionné.');
+  if (typeof window.grecUpload !== 'function') throw new Error("Envoi d'image indisponible : rechargez la page.");
+  if (!/^image\//.test(file.type)) throw new Error('Le fichier doit être une image (JPEG, PNG, WebP ou GIF).');
+  const folder = String(path || '').split('/')[0];
+  return window.grecUpload(await shrinkImage(file), folder);
 }
 
 async function uploadIfNeeded(fileInput, existingUrl = '', folder = STORAGE_PATHS.GALERIE) {

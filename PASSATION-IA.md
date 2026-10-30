@@ -1,10 +1,24 @@
 # PASSATION — Site GREC Group (à lire en premier)
 
 > **Pour qui ?** Un agent IA (ou un développeur) qui reprend le projet sans avoir suivi l'historique.
-> **Dernière mise à jour :** 28 octobre 2026. Ce fichier est la **référence à jour**. `SUIVI-PROJET.md` est le journal historique : certaines de ses sections anciennes (listes « à tester », adresses `grec-group.web.app`) sont dépassées.
+> **Dernière mise à jour :** 30 octobre 2026 (site basculé sur OVH ; voir §0). Ce fichier est la **référence à jour**. `SUIVI-PROJET.md` est le journal historique : certaines de ses sections anciennes (listes « à tester », adresses `grec-group.web.app`) sont dépassées.
 > **Aucun secret dans ce fichier ni dans le dépôt (qui est PUBLIC).** Ne jamais en ajouter (voir §8).
 
 ---
+
+## 0. ÉTAT ACTUEL (30 octobre 2026) — LIRE AVANT LE RESTE
+
+**Le site en production (https://grec.group) tourne sur OVH : API PHP + MySQL `hconsuqgrec`, sans Firebase.** Les §2 à §4 décrivent l'époque Firebase (historique) ; le §4 ter décrit la migration, maintenant faite.
+
+- **Comptes** : table `app_user` (bcrypt). **Anciens membres** : la connexion lit le SHA-512 de `g_membre` / `g_admin` (même base) et crée le compte à la 1re connexion (`api/lib/legacy.php`, `api/lib/auth.php`) : aucune ré-inscription, mots de passe d'origine conservés. L'API reflète les membres dans `g_membre` (`legacy_mirror`). Les tables `g_*` ne sont jamais supprimées.
+- **Annuaire public** : `GET /api/members` (8 par page côté serveur, filtres pays/activité).
+- **Images** : l'envoi passe par `POST /api/upload` (`api/lib/upload.php`, côté navigateur `uploadFile()` dans `js/utils.js` + `window.grecUpload` dans `js/backend-ovh.js`) et va dans `uploads/<dossier>/` sur l'hébergement. Les anciennes images Cloudinary se rapatrient avec `tools/migration/6-images-vers-ovh.php` (à copier temporairement dans `api/`, voir son en-tête).
+- **E-mail** : **ne fonctionne pas** (la fonction `mail()` d'OVH n'a jamais livré ; l'offre « MX Plan » du domaine ne permet pas de créer de boîte). Il faut une offre e-mail OVH (Email Pro…) : créer `no-reply@grec.group`, SPF/DKIM, puis mettre `mail_mode 'smtp'` + `smtp_*` dans `api/config.php` du serveur. Tant que ce n'est pas fait : « mot de passe oublié » et la confirmation d'inscription sont inopérants.
+- **Ancien site** (`grec-old/`) : ouvert/fermé par échange de `.htaccess` (`deploy/ancien_site.py`, README). L'état courant est à vérifier avec `python deploy/ancien_site.py etat`.
+- **Firebase** : plus utilisé, gardé quelques semaines comme retour arrière (aucune vraie personne ne s'y est inscrite après l'export du 29/10). Le dossier de test `/nouveau/` est supprimé du serveur.
+- **Design** : tableau de bord admin (menus à part, icônes), profil public, profil privé et messagerie refaits dans le même style (cartes compactes, coins 8–12 px, bandeau, avatars ronds).
+- **Tests** : `api/tests/run.mjs` = 118 contrôles ; `tools/audit.mjs` 10 pages × 2 largeurs.
+- **Restant** : e-mail (ci-dessus) ; validation des 51 inscrits de 2021 par le client ; annonce aux membres ; compte de test `admintest@gmail.com` à supprimer (ancien `g_admin` + `app_user` `zt-admintest` + `admins/zt-admintest`) ; changer le mot de passe de la base (puis mettre à jour `api/config.php` et les 3 `config.php` de l'ancien site) — les identifiants FTP sont conservés à la demande de l'utilisateur ; sauvegarde régulière de la base et du dossier `uploads/`.
 
 ## 1. Le projet en 30 secondes
 
@@ -93,7 +107,7 @@ Non migrés volontairement : ≈ 3 960 inscriptions automatiques (spam), restée
 
 **Reste à décider / à faire** : (a) **faire valider** par le client, un par un dans le tableau de bord (Membres → Valider), les 51 inscrits de fin 2021 qu'il reconnaît ; (b) les **2 membres validés sans e-mail valide** (à corriger à la main) ; (c) liste « à vérifier » des inscrits 2023-2026 (presque tous du spam, non importés) ; (d) reporter les **catégories** des articles (Société, Culture, Économie, selon `g_news.id_categorie`) si l'affichage en a besoin ; (e) **prévenir les membres migrés** (message : « le nouveau site est en ligne, connectez-vous avec vos identifiants habituels ») ; (f) **sécurité** : l'ancienne base MySQL contient toujours le spam et les hash SHA-512 : la garder comme archive, ne jamais la réexposer ; changer le mot de passe de la base (il a transité en clair dans une conversation).
 
-## 4 ter. MIGRATION VERS OVH (MySQL + PHP) — EN COURS, branche `migration-ovh` (29 octobre 2026)
+## 4 ter. MIGRATION VERS OVH (MySQL + PHP) — FAITE le 30 octobre 2026 (historique de la préparation)
 
 **Décision** : le client veut un projet sans quota ni dépendance (milliers de membres possibles) : comptes et données migrent de Firebase vers **MySQL OVH + une API PHP sur l'hébergement** (pas de VPS, tout reste sur le même hébergement). Firebase reste en production (branche `main`) **jusqu'à la bascule**.
 

@@ -92,6 +92,27 @@
     });
   }
 
+  // Envoi d'une image vers l'hébergement (api/upload) ; retourne l'URL publique.
+  function upload(file, folder, retried) {
+    var ready = csrf ? Promise.resolve() : (csrfPromise || refreshSession());
+    return ready.then(function () {
+      var fd = new FormData();
+      fd.append('file', file);
+      fd.append('folder', folder || '');
+      return fetch(API + 'upload', { method: 'POST', credentials: 'same-origin', headers: { 'X-CSRF-Token': csrf, Accept: 'application/json' }, body: fd });
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (j) {
+        if (!res.ok || !j.url) {
+          var err = (j && j.error) || {};
+          if (res.status === 403 && err.code === 'csrf' && !retried) { csrf = ''; csrfPromise = null; return upload(file, folder, true); }
+          throw makeError(err.code || ('http-' + res.status), err.message || 'Envoi impossible (erreur ' + res.status + ').');
+        }
+        return j.url;
+      });
+    });
+  }
+  window.grecUpload = upload;
+
   // ---------- Authentification ----------
   function User(raw) {
     this.uid = raw.uid; this.email = raw.email; this.displayName = raw.displayName || null;

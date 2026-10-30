@@ -190,6 +190,27 @@ const ts = (ms) => ({ __ts: ms });
   r = await ad.set('inconnue/doc', { a: 1 }); check('collection inconnue : refusée même pour un administrateur', denied(r));
   r = await ad.query('chats'); check('même un administrateur ne lit pas toutes les conversations privées', denied(r));
 
+  console.log('\n=== ENVOI D\'IMAGES (hébergement)');
+  {
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+    const send = async (client, bytes, name, type, folder = 'membres', csrf = client.csrf) => {
+      const fd = new FormData(); fd.append('file', new Blob([bytes], { type }), name); fd.append('folder', folder);
+      const cookie = Object.entries(client.cookies).map(([k, v]) => k + '=' + v).join('; ');
+      const res = await fetch(BASE + '/api/upload', { method: 'POST', headers: { Cookie: cookie, 'X-CSRF-Token': csrf }, body: fd });
+      let json = null; try { json = await res.json(); } catch (e) { /* pas de JSON */ }
+      return { status: res.status, json };
+    };
+    const clean = (url) => { try { fs.unlinkSync(new URL('../..' + new URL(url).pathname, import.meta.url)); } catch (e) { /* nettoyage facultatif */ } };
+    const anon = await mk();
+    r = await send(anon, png, 'a.png', 'image/png'); check('envoi d\'image sans connexion refusé (401)', r.status === 401);
+    r = await send(ad, png, 'a.png', 'image/png', 'membres', 'faux'); check('envoi d\'image sans jeton CSRF valide refusé (403)', r.status === 403);
+    r = await send(ad, png, 'a.png', 'image/png'); check('envoi d\'une image PNG accepté', r.status === 200 && /\/uploads\/membres\/[0-9a-f]{20}\.png$/.test((r.json && r.json.url) || ''), JSON.stringify(r.json));
+    if (r.status === 200) { const img = await fetch(BASE + new URL(r.json.url).pathname); check('l\'image envoyée est servie par le site', img.status === 200 && (img.headers.get('content-type') || '').includes('image/png')); clean(r.json.url); }
+    r = await send(ad, Buffer.from('<?php echo 1; ?>'), 'x.php.png', 'image/png'); check('fichier non image déguisé en PNG refusé (415)', r.status === 415);
+    r = await send(ad, png, 'a.png', 'image/png', '../../etc'); check('dossier de destination hors liste : rangé dans "divers"', r.status === 200 && r.json.url.includes('/uploads/divers/'));
+    if (r.status === 200) clean(r.json.url);
+  }
+
   console.log(`\nRÉSULTAT : ${ok} contrôles conformes, ${ko} non conformes.`);
   process.exit(ko ? 1 : 0);
 })().catch((e) => { console.log('ERREUR', e); process.exit(2); });

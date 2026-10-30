@@ -13,6 +13,7 @@ require __DIR__ . '/lib/legacy.php';
 require __DIR__ . '/lib/policy.php';
 require __DIR__ . '/lib/mail.php';
 require __DIR__ . '/lib/auth.php';
+require __DIR__ . '/lib/upload.php';
 
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
@@ -127,8 +128,10 @@ try {
         json_out(200, array('total' => $total, 'page' => $page, 'pages' => $pages, 'perPage' => $per, 'items' => $items, 'pays' => $paysList));
     }
 
+    if ($route === 'upload' && $method === 'POST') handle_upload();
+
     if ($method !== 'POST') fail(405, 'method-not-allowed', 'POST attendu');
-    $ct = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
+    $ct =isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
     if (stripos($ct, 'application/json') === false) fail(415, 'unsupported-media-type', 'JSON attendu');
     require_csrf();
     $b = body();
