@@ -7,6 +7,8 @@ Site du Groupe de Réflexion sur l'Entrepreneuriat et la Créativité au Bénin.
 - **Stack** : HTML, Tailwind CSS **compilé**, JavaScript sans framework ; **API PHP + base MySQL OVH** (`api/`, base `hconsuqgrec`) pour les comptes et les données ; images envoyées dans `uploads/` sur l'hébergement. Plus aucune dépendance à Firebase ni à Cloudinary pour les nouvelles données.
 - **Déploiement** : **manuel** par FTP (`deploy/ftp_deploy.py` pour le site, `deploy/ftp_deploy_api.py` pour l'API). Aucun déploiement automatique.
 
+> **Guide du projet (ce qui est fait, ce qui reste, mode d'emploi) : [GUIDE-PROJET.md](GUIDE-PROJET.md).**
+>
 > **Reprise du projet (humain ou agent IA) : lire d'abord [PASSATION-IA.md](PASSATION-IA.md)** : ce qui est fait, ce qui reste à faire, procédures et pièges connus.
 > [SUIVI-PROJET.md](SUIVI-PROJET.md) est le journal historique.
 

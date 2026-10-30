@@ -709,7 +709,7 @@
           <div class="grid lg:grid-cols-[1fr_380px] gap-6 items-start">
             <div>
               <h2 class="font-display text-2xl font-bold text-navy mb-3">Paramètres admin</h2>
-              <p class="text-sm text-slate-500 max-w-3xl mb-6">Ce tableau de bord est réservé aux comptes administrateurs. Un administrateur est un compte dont le document `admins/{uid}` existe et est actif : le premier se crée dans la console Firebase, les suivants avec le bouton ci-dessous (la personne doit d'abord s'être inscrite comme membre).</p>
+              <p class="text-sm text-slate-500 max-w-3xl mb-6">Ce tableau de bord est réservé aux comptes administrateurs. Un administrateur est un compte dont le document `admins/{uid}` existe et est actif : les suivants se créent avec le bouton ci-dessous (la personne doit d'abord avoir un compte membre, nouveau ou migré de l'ancien site).</p>
 
               <div class="space-y-4">
                 <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -723,8 +723,7 @@
 
                 <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <h3 class="font-semibold text-navy mb-2">Sauvegarde des données</h3>
-                  <p class="text-sm text-slate-600 mb-4">Tous les contenus sont sauvegardés automatiquement dans
-                    Firestore.</p>
+                  <p class="text-sm text-slate-600 mb-4">Tous les contenus sont enregistrés dans la base de données du site (OVH).</p>
                   <button id="refresh-btn-settings" onclick="refreshAll()"
                     class="mini-btn bg-slate-700 text-white w-full">↻ Rafraîchir maintenant</button>
                 </div>
