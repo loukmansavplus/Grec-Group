@@ -174,19 +174,17 @@
     /* ===== Refonte tableau de bord : barre latérale à icônes, une vue par menu, espacements et rayons réduits ===== */
     body { background: #f3f5f8; }
     .glass-panel { background: #fff; backdrop-filter: none; box-shadow: none; border: 0; border-bottom: 1px solid #e5e9f0; }
-    aside.glass-panel { background: #0D1B2A; color: #cbd5e1; border: 0; border-right: 1px solid rgba(255,255,255,.06); padding: 1.1rem 0.9rem !important; overflow-y: auto; }
-    aside.glass-panel .text-navy { color: #fff; }
-    aside.glass-panel .text-slate-500 { color: rgba(255,255,255,.55); }
+    aside.glass-panel { background: #fff; border: 0; border-right: 1px solid #e5e9f0; padding: 1.1rem 0.9rem !important; overflow-y: auto; }
     aside.glass-panel > a { margin-bottom: 1rem !important; }
-    aside.glass-panel .rounded-2xl.bg-navy { background: rgba(255,255,255,.06); border-radius: 12px; padding: .65rem .75rem; margin-bottom: .9rem !important; }
+    aside.glass-panel .rounded-2xl.bg-navy { border-radius: 10px; padding: .65rem .75rem; margin-bottom: .9rem !important; }
     #sidebar-avatar { width: 2.4rem; height: 2.4rem; border-radius: 10px; font-size: 1rem; }
     .dashboard-nav { display: block; }
-    .dashboard-nav .nav-group { margin: .9rem .5rem .3rem; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: #C8893A; font-weight: 700; }
-    .dashboard-nav a { display: flex; align-items: center; gap: .65rem; padding: .5rem .65rem; border-radius: 8px; color: #cbd5e1; transition: background .15s, color .15s; margin-bottom: 2px; }
-    .dashboard-nav a:hover { background: rgba(255,255,255,.08); color: #fff; }
-    .dashboard-nav a.active { background: rgba(200,137,58,.18); color: #fff; box-shadow: inset 3px 0 0 #C8893A; }
-    .dashboard-nav .nav-ico { width: 1.15rem; height: 1.15rem; flex: none; opacity: .9; }
-    .dashboard-nav a.active .nav-ico { color: #E0A85A; opacity: 1; }
+    .dashboard-nav .nav-group { margin: .9rem .5rem .3rem; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: #94a3b8; font-weight: 700; }
+    .dashboard-nav a { display: flex; align-items: center; gap: .65rem; padding: .5rem .65rem; border-radius: 8px; color: #334155; transition: background .15s, color .15s; margin-bottom: 2px; }
+    .dashboard-nav a:hover { background: #f1f5f9; color: #0D1B2A; }
+    .dashboard-nav a.active { background: #0D1B2A; color: #fff; box-shadow: none; }
+    .dashboard-nav .nav-ico { width: 1.15rem; height: 1.15rem; flex: none; color: #64748b; }
+    .dashboard-nav a.active .nav-ico { color: #E0A85A; }
     .dashboard-nav.mobile-grid a { background: #f1f5f9; color: #0D1B2A; padding: .6rem .75rem; }
     .dashboard-nav.mobile-grid a.active { background: #0D1B2A; color: #fff !important; box-shadow: none; }
     .dashboard-nav.mobile-grid a.active span { color: #fff !important; }
@@ -225,7 +223,7 @@
   <div class="min-h-screen lg:grid lg:grid-cols-[300px_1fr]">
     <aside class="glass-panel sticky top-0 hidden lg:flex h-screen flex-col p-6">
       <a href="../index.html" class="flex items-center gap-3 mb-8">
-        <img src="../Assets/images/logo-neutre.png" alt="GREC" class="h-12 w-12 object-contain" />
+        <img src="../Assets/images/logo.png" alt="GREC" class="h-12 w-12 object-contain" />
         <div>
           <div class="font-display text-xl font-bold text-navy">GREC</div>
           <div class="text-xs uppercase tracking-[0.28em] text-slate-500">Dashboard admin</div>
