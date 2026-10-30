@@ -55,3 +55,56 @@ function legacy_delete_member($data)
         error_log('GREC legacy delete: ' . $e->getMessage());
     }
 }
+
+// ---- Connexion avec un compte de l'ancien site (même base) ----
+
+function legacy_hash_ok($stored, $password)
+{
+    return preg_match('/^[0-9a-f]{128}$/i', (string) $stored) && hash_equals(strtolower($stored), hash('sha512', (string) $password));
+}
+
+// Cherche dans g_admin puis g_membre une ligne de cette adresse dont le mot de passe correspond. Retourne array('kind'=>'a'|'m', 'row'=>...) ou null.
+// Les tables d'origine ne sont jamais modifiées ; les erreurs (table absente en test) donnent simplement « non ».
+function legacy_login_match($email, $password)
+{
+    try {
+        foreach (q('SELECT * FROM g_admin WHERE LOWER(email) = ? AND statut = 1 LIMIT 5', array($email))->fetchAll() as $r) {
+            if (legacy_hash_ok($r['password'], $password)) return array('kind' => 'a', 'row' => $r);
+        }
+        foreach (q('SELECT * FROM g_membre WHERE LOWER(email) = ? ORDER BY id_membre DESC LIMIT 20', array($email))->fetchAll() as $r) {
+            if (legacy_hash_ok($r['password'], $password)) return array('kind' => 'm', 'row' => $r);
+        }
+    } catch (Exception $e) {
+        return null;
+    }
+    return null;
+}
+
+// Crée le compte et les fiches du nouveau site pour un compte de l'ancien site qui se connecte pour la première fois. Retourne l'uid.
+function legacy_provision($email, $match, $password)
+{
+    $r = $match['row'];
+    $now = now_ms();
+    $uid = ($match['kind'] === 'a' ? 'legacy-a' : 'legacy-m') . (int) ($match['kind'] === 'a' ? $r['id_admin'] : $r['id_membre']);
+    if (q('SELECT uid FROM app_user WHERE uid = ?', array($uid))->fetch()) $uid .= '-' . rand_id(6);
+    $name = trim((string) $r['nom_prenom']);
+    q('INSERT INTO app_user (uid, email, pass_hash, display_name, email_verified, created_ms) VALUES (?,?,?,?,1,?)',
+        array($uid, $email, password_hash((string) $password, PASSWORD_DEFAULT), mb_substr($name, 0, 255), $now));
+    if ($match['kind'] === 'a') {
+        doc_put('admins', $uid, array('uid' => $uid, 'email' => $email, 'name' => $name, 'role' => 'admin', 'active' => true,
+            'legacyType' => (string) $r['type_cmpte'], 'legacyId' => (int) $r['id_admin'], 'legacySource' => 'ancien-site-php', 'createdAt' => array('__ts' => $now)));
+        return $uid;
+    }
+    $created = (!empty($r['datecreated']) && strtotime($r['datecreated'] . ' UTC') !== false) ? strtotime($r['datecreated'] . ' UTC') * 1000 : $now;
+    $statut = ((int) $r['statut'] === 1) ? 'actif' : 'en_attente';
+    $m = array('nom' => $name, 'prenom' => '', 'nomFamille' => '', 'email' => $email, 'telephone' => trim((string) $r['phone']), 'pays' => trim((string) $r['pays']),
+        'secteur' => trim((string) $r['activite']), 'bio' => trim((string) $r['presentation']), 'poste' => '', 'ville' => '', 'statut' => $statut, 'codeEthique' => true,
+        'role' => 'membre', 'publicProfileEnabled' => true, 'showPhoto' => true, 'showBio' => true, 'showLocation' => true, 'legacyId' => (int) $r['id_membre'],
+        'legacySource' => 'ancien-site-php', 'createdAt' => array('__ts' => $created), 'updatedAt' => array('__ts' => $now));
+    doc_put('membres', $uid, $m);
+    if ($statut === 'actif') {
+        doc_put('annuaire', $uid, array('nom' => $name, 'secteur' => $m['secteur'], 'pays' => $m['pays'], 'ville' => '', 'poste' => '', 'bio' => $m['bio'],
+            'showPhoto' => true, 'showBio' => true, 'showLocation' => true, 'createdAt' => array('__ts' => $created), 'updatedAt' => array('__ts' => $now)));
+    }
+    return $uid;
+}

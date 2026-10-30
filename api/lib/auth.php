@@ -107,10 +107,15 @@ function do_login($email, $password)
         } elseif (!empty($u['pass_sha512']) && hash_equals(strtolower($u['pass_sha512']), hash('sha512', (string) $password))) {
             $ok = true; // mot de passe de l'ancien site : on le remplace par un hachage moderne
             q('UPDATE app_user SET pass_hash = ?, pass_sha512 = NULL WHERE uid = ?', array(password_hash((string) $password, PASSWORD_DEFAULT), $u['uid']));
-        } elseif (empty($u['pass_hash']) && empty($u['pass_sha512']) && legacy_password_ok($u['uid'], (string) $password)) {
+        } elseif (empty($u['pass_hash']) && empty($u['pass_sha512']) && (legacy_password_ok($u['uid'], (string) $password) || legacy_login_match($email, (string) $password))) {
             $ok = true; // mot de passe lu dans les anciennes tables g_membre / g_admin (même base), puis remplacé par un hachage moderne
             q('UPDATE app_user SET pass_hash = ? WHERE uid = ?', array(password_hash((string) $password, PASSWORD_DEFAULT), $u['uid']));
         }
+    } elseif (!$u && $email !== '' && valid_email($email) && ($match = legacy_login_match($email, (string) $password))) {
+        // compte créé sur l'ancien site (inscription récente, ou jamais migré) : on le crée ici avec les mêmes données
+        $newUid = legacy_provision($email, $match, (string) $password);
+        $u = user_by_uid($newUid);
+        $ok = true;
     }
     if (!$ok) { record_attempt($mailKey); record_attempt($ipKey); auth_error(401, 'auth/invalid-credential'); }
     login_session($u['uid']);

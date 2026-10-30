@@ -10,6 +10,17 @@ function send_mail($to, $subject, $html)
         return true;
     }
     $fromAddr = preg_match('/<([^>]+)>/', $from, $m) ? $m[1] : $from;
+    if (cfg('mail_mode') === 'mail_old') { // même méthode que l'ancien site PHP (essai de livraison)
+        $h = "From: grec 
+Reply-to: noreply@grec.group 
+MIME-Version: 1.0 
+Content-Type: text/html; charset=\"UTF-8\" 
+";
+        $ok = @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $html, $h);
+        @file_put_contents(dirname(__DIR__) . '/mail-send.log', '[' . date('c') . '] TO: ' . $to . ' | méthode ancien site : ' . ($ok ? 'accepté par le serveur' : 'REFUSÉ') . "
+", FILE_APPEND);
+        return $ok;
+    }
     if (cfg('mail_mode') === 'smtp') {
         try {
             $ok = smtp_send($to, $subject, $html, $from, $fromAddr);
