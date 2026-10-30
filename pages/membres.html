@@ -554,6 +554,11 @@
             oninput="filterMembres()" />
         </div>
 
+        <!-- Filtre pays (liste construite à partir des membres affichés) -->
+        <select id="pays-filter" class="form-input md:max-w-[200px]" aria-label="Filtrer par pays" onchange="currentPage = 1; filterMembres()">
+          <option value="">Tous les pays</option>
+        </select>
+
         <!-- Filtres secteur + vue -->
         <div class="filter-scroll-row flex items-center gap-3 pb-1">
           <span class="text-xs text-slate-400 shrink-0">Secteur :</span>
@@ -857,9 +862,7 @@
   <div id="toast-container"></div>
 
   <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="../js/backend-ovh.js?v=1"></script>
   <script src="../js/firebase-config.js?v=5"></script>
   <script src="../js/utils.js?v=6"></script>
 
@@ -878,29 +881,18 @@
       filterMembres();
     }
 
-    // -- Recherche + filtre: marque les cartes compatibles, puis délègue l'affichage à la pagination. --
+    // -- Recherche + filtres : le serveur renvoie seulement la page demandée (8 fiches) ; on revient page 1 si un filtre change. --
+    let lastQueryKey = '';
+    let searchTimer = null;
     function filterMembres() {
-      const q = document.getElementById('search-input').value.toLowerCase();
-      const cards = document.querySelectorAll('#membres-grid .membre-card');
-      let visible = 0;
-      cards.forEach(card => {
-        const nom = card.dataset.nom?.toLowerCase() || '';
-        const secteur = card.dataset.secteur?.toLowerCase() || '';
-        const pays = card.dataset.pays?.toLowerCase() || '';
-        const txt = card.textContent.toLowerCase();
-        const matchSearch = !q || txt.includes(q) || nom.includes(q) || pays.includes(q);
-        const matchSecteur = currentSecteur === 'all' || secteur === currentSecteur;
-        const isMatch = matchSearch && matchSecteur;
-        card.dataset.match = isMatch ? 'true' : 'false';
-        if (isMatch) visible++;
-      });
-      document.getElementById('membres-empty').classList.toggle('hidden', visible > 0);
-      renderMembresPage();
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(loadMembresPage, 250);
     }
 
     // -- Reset filtres: revient au premier chip et à la première page. --
     function resetFilter() {
       document.getElementById('search-input').value = '';
+      const pf = document.getElementById('pays-filter'); if (pf) pf.value = '';
       currentSecteur = 'all';
       currentPage = 1;
       document.querySelectorAll('.filter-chip').forEach((b, i) => b.classList.toggle('active', i === 0));
@@ -917,21 +909,45 @@
       if (vue === 'list') buildListView();
     }
 
-    // -- Pagination: affiche seulement les cartes de la page courante et régénère les boutons. --
-    function renderMembresPage() {
-      const cards = [...document.querySelectorAll('#membres-grid .membre-card')];
-      const matchedCards = cards.filter(card => card.dataset.match !== 'false');
-      const totalPages = Math.max(1, Math.ceil(matchedCards.length / membresPerPage));
-      currentPage = Math.min(Math.max(currentPage, 1), totalPages);
-      const start = (currentPage - 1) * membresPerPage;
-      const end = start + membresPerPage;
-
-      cards.forEach(card => { card.style.display = 'none'; });
-      matchedCards.slice(start, end).forEach(card => { card.style.display = ''; });
-
-      renderPagination(totalPages, matchedCards.length);
-      updateMembresCount(matchedCards.length, start, end);
-      if (currentVue === 'list') buildListView();
+    // -- Pagination côté serveur : demande la page courante avec les filtres actifs, puis affiche cartes, boutons et compteur. --
+    async function loadMembresPage() {
+      const q = document.getElementById('search-input').value.trim();
+      const pays = document.getElementById('pays-filter')?.value || '';
+      const secteur = currentSecteur === 'all' ? '' : currentSecteur;
+      const key = [q, pays, secteur].join('|');
+      if (key !== lastQueryKey) { lastQueryKey = key; currentPage = 1; }
+      const params = new URLSearchParams({ page: String(currentPage) });
+      if (q) params.set('q', q);
+      if (pays) params.set('pays', pays);
+      if (secteur) params.set('secteur', secteur);
+      try {
+        const res = await fetch('../api/members?' + params.toString(), { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        currentPage = data.page;
+        const T = firebase.firestore.Timestamp;
+        const html = data.items.map(it => {
+          const d = Object.assign({}, it.data);
+          if (d.createdAt && d.createdAt.__ts) d.createdAt = T.fromMillis(d.createdAt.__ts);
+          return renderMemberCard({ id: it.id, data: () => d });
+        });
+        document.getElementById('membres-grid').innerHTML = html.join('');
+        document.querySelectorAll('#membres-grid .membre-card').forEach(c => { c.dataset.match = 'true'; });
+        const pf = document.getElementById('pays-filter');
+        if (pf && pf.options.length <= 1) {
+          pf.innerHTML = '<option value="">Tous les pays</option>' + data.pays.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
+        }
+        if (!q && !pays && !secteur) document.getElementById('hero-member-count').textContent = String(data.total);
+        document.getElementById('membres-empty').classList.toggle('hidden', data.total > 0);
+        const start = (data.page - 1) * data.perPage;
+        renderPagination(data.pages, data.total);
+        updateMembresCount(data.total, start, start + data.perPage);
+        initScrollReveal();
+        if (currentVue === 'list') buildListView();
+      } catch (e) {
+        console.log('Annuaire indisponible', e);
+        document.getElementById('membres-empty').classList.remove('hidden');
+      }
     }
 
     // -- Boutons de pagination: évite les pages mortes et ajoute les ellipses quand nécessaire. --
@@ -974,7 +990,7 @@
       btn.addEventListener('click', () => {
         if (disabled) return;
         currentPage = page;
-        renderMembresPage();
+        loadMembresPage();
         document.getElementById('membres-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       return btn;
@@ -1130,37 +1146,9 @@
     }
 
     // -- Chargement Firestore: remplace la grille statique par les vrais profils publics quand la base répond. --
-    async function loadMembresFromFirestore() {
-      try {
-        const snap = await db.collection('annuaire').limit(300).get();
-        if (snap.empty) { document.getElementById('hero-member-count').textContent = '0'; filterMembres(); return; }
-        const docs = [];
-        snap.forEach(doc => {
-          docs.push(doc);
-        });
-        docs.sort((a, b) => {
-          const at = a.data()?.createdAt?.toDate?.()?.getTime?.() || 0;
-          const bt = b.data()?.createdAt?.toDate?.()?.getTime?.() || 0;
-          return bt - at;
-        });
-        const html = [];
-        docs.forEach(doc => {
-          html.push(renderMemberCard(doc));
-        });
-        document.getElementById('membres-grid').innerHTML = html.join('');
-        document.getElementById('hero-member-count').textContent = String(html.length);
-        currentPage = 1;
-        filterMembres();
-        initScrollReveal();
-      } catch (e) {
-        console.log('Firestore non configuré — contenu statique affiché');
-      }
-    }
-
     // -- Init page: initialise les helpers globaux puis active le filtrage/pagination locale. --
     initNavbar(); initMobileMenu(); initScrollReveal(); initAuthState();
-    filterMembres();
-    loadMembresFromFirestore();
+    loadMembresPage();
   </script>
 
   <!-- Floating Chat Button -->

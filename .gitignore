@@ -78,3 +78,9 @@ node_modules/
 
 # Notes locales pouvant contenir des clés : ne jamais publier
 Assets/API USEFULL*
+
+# API : configuration locale/serveur (identifiants) et journaux : jamais commités
+api/config.php
+api/mail.log
+api/*.log
+api/mail-send.log

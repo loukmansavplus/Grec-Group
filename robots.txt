@@ -3,6 +3,7 @@ Disallow: /admin/
 Disallow: /pages/galerie.html
 Disallow: /pages/auth.html
 Disallow: /pages/register.html
+Disallow: /pages/reset-password.html
 Disallow: /pages/chat.html
 Disallow: /pages/profil.html
 
