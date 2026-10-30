@@ -175,7 +175,8 @@
     body { background: #f3f5f8; }
     .glass-panel { background: #fff; backdrop-filter: none; box-shadow: none; border: 0; border-bottom: 1px solid #e5e9f0; }
     aside.glass-panel { background: #fff; border: 0; border-right: 1px solid #e5e9f0; padding: 1.1rem 0.9rem !important; overflow-y: auto; }
-    aside.glass-panel > a { margin-bottom: 1rem !important; }
+    .admin-logo { display: flex; justify-content: center; margin: .25rem 0 1rem !important; }
+    .admin-logo img { height: 3.4rem; width: auto; object-fit: contain; }
     aside.glass-panel .rounded-2xl.bg-navy { border-radius: 10px; padding: .65rem .75rem; margin-bottom: .9rem !important; }
     #sidebar-avatar { width: 2.4rem; height: 2.4rem; border-radius: 10px; font-size: 1rem; }
     .dashboard-nav { display: block; }
@@ -222,13 +223,7 @@
 <body class="font-body text-navy">
   <div class="min-h-screen lg:grid lg:grid-cols-[300px_1fr]">
     <aside class="glass-panel sticky top-0 hidden lg:flex h-screen flex-col p-6">
-      <a href="../index.html" class="flex items-center gap-3 mb-8">
-        <img src="../Assets/images/logo.png" alt="GREC" class="h-12 w-12 object-contain" />
-        <div>
-          <div class="font-display text-xl font-bold text-navy">GREC</div>
-          <div class="text-xs uppercase tracking-[0.28em] text-slate-500">Dashboard admin</div>
-        </div>
-      </a>
+      <a href="../index.html" class="admin-logo" aria-label="GREC — retour au site"><img src="../Assets/images/logo.png" alt="GREC" /></a>
 
       <div class="rounded-2xl bg-navy text-white p-4 mb-6">
         <div class="flex items-center gap-3">
